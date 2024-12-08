@@ -41,7 +41,7 @@ const INTERACTION_SOUNDS: Record<string, SoundConfig> = {
   bookDrop: {
     src: '/sounds/book-sound.mp3',
     volume: 0.5,
-    startTime: 0.6,
+    startTime: 0.65,
   },
   // Weather switch whoosh (skip first 0.8s)
   weatherSwitch: {
