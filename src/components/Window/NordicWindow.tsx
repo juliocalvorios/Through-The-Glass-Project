@@ -436,7 +436,7 @@ function GlassEffects({
               opacity: [0.5, 0.8, 0.6, 0.75, 0.5],
             }}
             transition={{
-              duration: 2.5,
+              duration: 3,
               repeat: Infinity,
               ease: 'easeInOut',
             }}
@@ -636,7 +636,7 @@ function Curtains({
           x: hasWind ? [0, 6, 0, 4, 0] : 0,
         }}
         transition={hasWind
-          ? { duration: 2.5, repeat: Infinity, ease: 'easeInOut' }
+          ? { duration: 3, repeat: Infinity, ease: 'easeInOut' }
           : { duration: 1.2, ease: 'easeInOut' }
         }
         onClick={onToggle}
@@ -727,7 +727,7 @@ function Curtains({
           x: hasWind ? [0, -5, 0, -3, 0] : 0,
         }}
         transition={hasWind
-          ? { duration: 2.5.2, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }
+          ? { duration: 3.2, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }
           : { duration: 1.2, ease: 'easeInOut' }
         }
         onClick={onToggle}
@@ -898,7 +898,7 @@ function Windowsill({ colors, isNight, condition }: { colors: any; isNight: bool
           }}
           initial={{ scaleY: 0 }}
           animate={{ scaleY: 1 }}
-          transition={{ duration: 2.5 }}
+          transition={{ duration: 3 }}
         />
       )}
 
