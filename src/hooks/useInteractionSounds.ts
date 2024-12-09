@@ -15,11 +15,11 @@ const INTERACTION_SOUNDS: Record<string, SoundConfig> = {
   // Curtains - separate files for open and close
   curtainOpen: {
     src: '/sounds/curtains-open.mp3',
-    volume: 0.55,
+    volume: 0.5,
   },
   curtainClose: {
     src: '/sounds/curtains-close.mp3',
-    volume: 0.55,
+    volume: 0.5,
   },
   // Lamp
   lamp: {
@@ -40,13 +40,13 @@ const INTERACTION_SOUNDS: Record<string, SoundConfig> = {
   // Book sound (skip first 0.6s)
   bookDrop: {
     src: '/sounds/book-sound.mp3',
-    volume: 0.55,
+    volume: 0.5,
     startTime: 0.65,
   },
   // Weather switch whoosh (skip first 0.8s)
   weatherSwitch: {
     src: '/sounds/whoose-switch-effect.mp3',
-    volume: 0.55,
+    volume: 0.5,
     startTime: 0.8,
   },
 }
