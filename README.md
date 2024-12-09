@@ -60,3 +60,9 @@ Julio Calvo - [Portfolio](https://juliocalvo.dev)
 ## License
 
 MIT
+
+
+## features
+- real-time weather integration
+- interactive nordic window
+- three.js particle effects
