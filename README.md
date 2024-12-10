@@ -70,3 +70,10 @@ MIT
 
 ## tech
 next.js, typescript, three.js, tailwind
+
+
+## installation
+```
+npm install
+npm run dev
+```
