@@ -66,3 +66,7 @@ MIT
 - real-time weather integration
 - interactive nordic window
 - three.js particle effects
+
+
+## tech
+next.js, typescript, three.js, tailwind
