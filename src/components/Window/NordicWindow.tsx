@@ -1054,3 +1054,4 @@ function getSkyGradient(timeOfDay: TimeOfDay, condition: WeatherCondition): stri
 
 export const NordicWindow = memo(NordicWindowComponent)
 // TODO; add mobile touch support for curtains
+// HACK; need better curtain physics
