@@ -28,7 +28,7 @@ function ThreeSnowComponent({ intensity = 'moderate', isNight = false }: ThreeSn
 
     // Snow count based on intensity
     const snowCount = {
-      light: 2800,
+      light: 3000,
       moderate: 4500,
       heavy: 10000,
     }[intensity]
