@@ -236,3 +236,4 @@ function ThreeAuroraComponent({ intensity = 'medium' }: ThreeAuroraProps) {
 }
 
 export const ThreeAurora = memo(ThreeAuroraComponent)
+// FIXME; aurora colors not accurate to real northern lights
