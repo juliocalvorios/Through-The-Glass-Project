@@ -16,22 +16,22 @@ interface NordicWindowProps {
 function NordicWindowComponent({ children, timeOfDay, condition, curtainsOpen = true, onCurtainsToggle, fireGlow = false }: NordicWindowProps) {
   const isNight = timeOfDay === 'night' || timeOfDay === 'dusk'
 
-  // Paleta de colores SCANDINAVIAN WINTER CABIN - Madera roja noruega
+  // red nordic wood colors
   const colors = {
     frame: {
-      // Madera roja escandinava (pino rojo, cerezo nórdico)
-      outer: isNight ? '#1a0f0f' : '#6B2D2D',      // Rojo oscuro profundo
-      middle: isNight ? '#2a1515' : '#8B3A3A',     // Rojo caoba
-      inner: isNight ? '#3d2020' : '#A04545',      // Rojo cerezo
-      accent: isNight ? '#4a2828' : '#B85555',     // Rojo cálido
-      highlight: isNight ? '#5a3535' : '#C96666',  // Rojo claro
-      deep: isNight ? '#120a0a' : '#4A1E1E',       // Rojo muy oscuro (sombras)
+      // scandinavian red wood tones
+      outer: isNight ? '#1a0f0f' : '#6B2D2D',      // deep red
+      middle: isNight ? '#2a1515' : '#8B3A3A',     // mahogany
+      inner: isNight ? '#3d2020' : '#A04545',      // cherry red
+      accent: isNight ? '#4a2828' : '#B85555',     // warm red
+      highlight: isNight ? '#5a3535' : '#C96666',  // light red
+      deep: isNight ? '#120a0a' : '#4A1E1E',       // darkest for shadows
     },
     glass: {
       tint: isNight ? 'rgba(10, 15, 30, 0.3)' : 'rgba(200, 220, 255, 0.1)',
     },
     curtain: {
-      base: isNight ? '#2a2525' : '#E8DDD5',       // Lino natural
+      base: isNight ? '#2a2525' : '#E8DDD5',       // natural linen
       shadow: isNight ? '#1a1515' : '#D0C4BC',
       highlight: isNight ? '#3a3232' : '#F5EDE5',
     }
@@ -48,9 +48,9 @@ function NordicWindowComponent({ children, timeOfDay, condition, curtainsOpen = 
         height: 'min(65vh, 550px)',
       }}
     >
-      {/* ============================================
-          CAPA 1: SOMBRA EXTERIOR PROFUNDA
-          ============================================ */}
+      {/* 
+          outer shadow layer
+           */}
       <div
         className="absolute -inset-4 rounded-2xl"
         style={{
@@ -69,9 +69,9 @@ function NordicWindowComponent({ children, timeOfDay, condition, curtainsOpen = 
         }}
       />
 
-      {/* ============================================
-          CAPA 2: MARCO EXTERIOR (Moldura principal)
-          ============================================ */}
+      {/* 
+          main frame border
+           */}
       <div
         className="absolute inset-0 rounded-xl overflow-hidden"
         style={{
@@ -100,9 +100,9 @@ function NordicWindowComponent({ children, timeOfDay, condition, curtainsOpen = 
           }}
         />
 
-        {/* ============================================
-            CAPA 3: SEGUNDO MARCO (Moldura intermedia)
-            ============================================ */}
+        {/* 
+            middle frame
+             */}
         <div
           className="relative w-full h-full rounded-lg overflow-hidden"
           style={{
@@ -123,9 +123,9 @@ function NordicWindowComponent({ children, timeOfDay, condition, curtainsOpen = 
           {/* Textura de madera - vetas horizontales */}
           <WoodGrainTexture isNight={isNight} />
 
-          {/* ============================================
-              CAPA 4: MARCO INTERIOR (Rebaje para el cristal)
-              ============================================ */}
+          {/* 
+              inner frame where glass sits
+               */}
           <div
             className="relative w-full h-full rounded-md overflow-hidden"
             style={{
@@ -137,9 +137,9 @@ function NordicWindowComponent({ children, timeOfDay, condition, curtainsOpen = 
               `,
             }}
           >
-            {/* ============================================
-                CAPA 5: ÁREA DEL CRISTAL
-                ============================================ */}
+            {/* 
+                glass area
+                 */}
             <div className="relative w-full h-full rounded overflow-hidden">
 
               {/* Fondo del cielo */}
@@ -155,18 +155,18 @@ function NordicWindowComponent({ children, timeOfDay, condition, curtainsOpen = 
                 {children}
               </div>
 
-              {/* ============================================
+              {/* 
                   CRISTAL: Efectos de vidrio realista
-                  ============================================ */}
+                   */}
               <GlassEffects
                 isNight={isNight}
                 condition={condition}
                 fireGlow={fireGlow}
               />
 
-              {/* ============================================
+              {/* 
                   DIVISIONES DE LA VENTANA (Muntins)
-                  ============================================ */}
+                   */}
               <WindowMuntins colors={colors} isNight={isNight} />
 
             </div>
@@ -174,9 +174,9 @@ function NordicWindowComponent({ children, timeOfDay, condition, curtainsOpen = 
         </div>
       </div>
 
-      {/* ============================================
+      {/* 
           CORTINAS
-          ============================================ */}
+           */}
       <Curtains
         isNight={isNight}
         condition={condition}
@@ -184,9 +184,9 @@ function NordicWindowComponent({ children, timeOfDay, condition, curtainsOpen = 
         onToggle={onCurtainsToggle || (() => {})}
       />
 
-      {/* ============================================
+      {/* 
           ALFÉIZAR (Windowsill)
-          ============================================ */}
+           */}
       <Windowsill colors={colors} isNight={isNight} condition={condition} />
 
     </motion.div>

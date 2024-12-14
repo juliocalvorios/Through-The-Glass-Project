@@ -58,7 +58,7 @@ function AnalogClockComponent({ weather, timeOfDay, condition, onHoverStart, onH
   const minuteDeg = isHoveringClock ? minutes * 6 + seconds * 0.1 + 360 : minutes * 6 + seconds * 0.1
   const hourDeg = isHoveringClock ? hours * 30 + minutes * 0.5 + 180 : hours * 30 + minutes * 0.5
 
-  // Colores SCANDINAVIAN WINTER CABIN - Madera roja noruega
+  // nordic cabin colors - red wood
   const colors = {
     wood: {
       // Madera roja escandinava (igual que la ventana)

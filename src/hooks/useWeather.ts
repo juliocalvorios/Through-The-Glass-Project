@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { WeatherData, WeatherCondition, Location } from '@/types'
 
-// Open-Meteo API - 100% gratuita, sin API key necesaria
+// open-meteo api - free, no key needed
 const BASE_URL = 'https://api.open-meteo.com/v1/forecast'
 
 // Mapeo de códigos WMO de Open-Meteo a nuestras condiciones
