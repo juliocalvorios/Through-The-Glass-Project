@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { motion, useAnimation } from 'framer-motion'
+import { useId } from 'react'
+import { motion } from 'framer-motion'
 import { TimeOfDay } from '@/types'
 
 interface DayNightToggleProps {
@@ -11,42 +11,29 @@ interface DayNightToggleProps {
 }
 
 export function DayNightToggle({ timeOfDay, isOverride, onToggle }: DayNightToggleProps) {
+  const id = useId()
   const isNight = timeOfDay === 'night' || timeOfDay === 'dusk'
-  const [isPulling, setIsPulling] = useState(false)
-  const cordControls = useAnimation()
-  const lampControls = useAnimation()
+  const isOn = !isNight
 
-  // Colores de la lámpara estilo cabaña
+  // Colores de la lámpara estilo cabaña nórdica
   const colors = {
-    cord: isNight ? '#3a2a20' : '#5A4030',
-    cordKnob: isNight ? '#D4A574' : '#C9A86C',
-    shade: isNight ? '#2a1818' : '#8B4A4A',
-    shadeLight: isNight ? '#3a2222' : '#A05858',
-    shadeDark: isNight ? '#1a0f0f' : '#6B3636',
-    metal: isNight ? '#B8956C' : '#D4A574',
-    metalDark: isNight ? '#8B7355' : '#A67C52',
-    bulbOff: '#4A4035',
-    bulbOn: '#FFF8E0',
-    glowColor: 'rgba(255, 220, 150, 0.6)',
-  }
+    // Cable y soportes
+    cable: isNight ? '#2a1a10' : '#4A3020',
+    cableHighlight: isNight ? '#3a2a20' : '#5A4030',
 
-  const handlePull = async () => {
-    setIsPulling(true)
+    // Metal (bronce/latón envejecido)
+    metal: isNight ? '#8B7355' : '#C9A86C',
+    metalLight: isNight ? '#A08060' : '#D4B87A',
+    metalDark: isNight ? '#5A4A35' : '#8B7040',
 
-    // Animate cord pull
-    await cordControls.start({
-      y: [0, 15, 0],
-      transition: { duration: 0.3, ease: 'easeInOut' }
-    })
+    // Pantalla de tela (rojo burdeos estilo cabaña)
+    shade: isNight ? '#2a1515' : '#8B4A4A',
+    shadeLight: isNight ? '#3a2020' : '#A05858',
+    shadeDark: isNight ? '#1a0a0a' : '#6B3636',
+    shadeInner: isNight ? '#1a0808' : '#4A2525',
 
-    // Slight lamp swing
-    lampControls.start({
-      rotate: [0, -2, 2, -1, 0],
-      transition: { duration: 0.5, ease: 'easeOut' }
-    })
-
-    onToggle()
-    setIsPulling(false)
+    // Bombilla
+    bulbGlass: isNight ? '#3a3530' : '#FFF8E8',
   }
 
   return (
@@ -55,233 +42,160 @@ export function DayNightToggle({ timeOfDay, isOverride, onToggle }: DayNightTogg
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, delay: 0.3 }}
       className="relative flex flex-col items-center"
-      style={{ width: '80px' }}
+      style={{ width: '100px' }}
     >
-      {/* Cable principal que va al techo */}
-      <div
-        className="w-1 rounded-full"
-        style={{
-          height: '30px',
-          background: `linear-gradient(180deg, ${colors.cord} 0%, ${colors.cordKnob} 100%)`,
-          boxShadow: isNight ? 'none' : '1px 0 2px rgba(0,0,0,0.2)',
-        }}
-      />
+      {/* Cable eléctrico que va al techo */}
+      <svg width="6" height="35" viewBox="0 0 6 35">
+        <defs>
+          <linearGradient id={`${id}-cableGrad`} x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor={colors.cable} />
+            <stop offset="50%" stopColor={colors.cableHighlight} />
+            <stop offset="100%" stopColor={colors.cable} />
+          </linearGradient>
+        </defs>
+        <rect x="1" y="0" width="4" height="35" rx="2" fill={`url(#${id}-cableGrad)`} />
+      </svg>
 
-      {/* La lámpara entera (se balancea) */}
-      <motion.div
-        animate={lampControls}
-        className="relative flex flex-col items-center"
-        style={{ transformOrigin: 'top center' }}
-      >
-        {/* Enganche de metal decorativo */}
-        <svg width="24" height="12" viewBox="0 0 24 12" className="relative z-10">
+      {/* Florón (ceiling rose) - pieza decorativa en el techo */}
+      <svg width="30" height="15" viewBox="0 0 30 15" style={{ marginTop: '-2px' }}>
+        <defs>
+          <linearGradient id={`${id}-floronGrad`} x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor={colors.metalLight} />
+            <stop offset="50%" stopColor={colors.metal} />
+            <stop offset="100%" stopColor={colors.metalDark} />
+          </linearGradient>
+        </defs>
+        <ellipse cx="15" cy="4" rx="12" ry="4" fill={`url(#${id}-floronGrad)`} />
+        <path d="M10 6 L10 12 Q15 14 20 12 L20 6" fill={colors.metal} />
+        <ellipse cx="15" cy="6" rx="8" ry="2" fill={colors.metalDark} opacity="0.5" />
+      </svg>
+
+      {/* Cadena decorativa */}
+      <div className="flex flex-col items-center" style={{ marginTop: '-3px' }}>
+        {[0, 1, 2].map((i) => (
+          <svg key={i} width="12" height="10" viewBox="0 0 12 10" style={{ marginTop: i > 0 ? '-4px' : 0 }}>
+            <ellipse cx="6" cy="5" rx="5" ry="4" fill="none" stroke={colors.metal} strokeWidth="2" />
+            <ellipse cx="6" cy="5" rx="3" ry="2" fill="none" stroke={colors.metalLight} strokeWidth="0.5" opacity="0.5" />
+          </svg>
+        ))}
+      </div>
+
+      {/* La lámpara cónica */}
+      <div className="relative flex flex-col items-center" style={{ marginTop: '-2px' }}>
+        <svg width="90" height="70" viewBox="0 0 90 70">
           <defs>
-            <linearGradient id="metalGradLamp" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor={colors.metal} />
-              <stop offset="50%" stopColor={colors.metalDark} />
-              <stop offset="100%" stopColor={colors.metal} />
+            <linearGradient id={`${id}-shadeOuter`} x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor={colors.shadeLight} />
+              <stop offset="30%" stopColor={colors.shade} />
+              <stop offset="70%" stopColor={colors.shade} />
+              <stop offset="100%" stopColor={colors.shadeDark} />
             </linearGradient>
+
+            <radialGradient id={`${id}-shadeInner`} cx="50%" cy="80%" r="80%">
+              <stop offset="0%" stopColor={isOn ? 'rgba(255,220,150,0.6)' : colors.shadeInner} />
+              <stop offset="60%" stopColor={isOn ? 'rgba(255,180,100,0.3)' : colors.shadeInner} />
+              <stop offset="100%" stopColor={colors.shadeInner} />
+            </radialGradient>
+
+            <radialGradient id={`${id}-bulbGrad`} cx="50%" cy="30%" r="70%">
+              <stop offset="0%" stopColor={isOn ? '#FFFEF8' : '#5a5550'} />
+              <stop offset="40%" stopColor={isOn ? '#FFF8E0' : '#4a4540'} />
+              <stop offset="100%" stopColor={isOn ? '#FFE8B0' : '#3a3530'} />
+            </radialGradient>
+
+            <pattern id={`${id}-fabricTexture`} patternUnits="userSpaceOnUse" width="4" height="4">
+              <rect width="4" height="4" fill={colors.shade} />
+              <line x1="0" y1="0" x2="4" y2="0" stroke={colors.shadeLight} strokeWidth="0.3" opacity="0.2" />
+              <line x1="0" y1="2" x2="4" y2="2" stroke={colors.shadeDark} strokeWidth="0.2" opacity="0.15" />
+            </pattern>
+
+            <filter id={`${id}-bulbGlow`} x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="3" />
+            </filter>
           </defs>
-          {/* Pieza de enganche */}
-          <path
-            d="M10 0 L14 0 L16 4 L18 4 L18 8 L6 8 L6 4 L8 4 Z"
-            fill="url(#metalGradLamp)"
-          />
-          {/* Remaches decorativos */}
-          <circle cx="8" cy="6" r="1" fill={colors.metalDark} />
-          <circle cx="16" cy="6" r="1" fill={colors.metalDark} />
+
+          {/* Soporte metálico superior */}
+          <path d="M40 0 L50 0 L52 5 L55 5 L55 10 L35 10 L35 5 L38 5 Z" fill={colors.metal} />
+          <path d="M38 5 L52 5 L52 8 L38 8 Z" fill={colors.metalDark} />
+
+          {/* Aro metálico superior */}
+          <ellipse cx="45" cy="12" rx="18" ry="3" fill={colors.metalDark} />
+          <ellipse cx="45" cy="11" rx="18" ry="3" fill={colors.metal} />
+          <ellipse cx="45" cy="11" rx="16" ry="2" fill={colors.metalLight} opacity="0.3" />
+
+          {/* Pantalla cónica */}
+          <path d="M27 13 L63 13 L75 55 L15 55 Z" fill={`url(#${id}-shadeOuter)`} />
+          <path d="M27 13 L63 13 L75 55 L15 55 Z" fill={`url(#${id}-fabricTexture)`} opacity="0.4" />
+
+          {/* Costuras decorativas */}
+          <line x1="45" y1="13" x2="45" y2="55" stroke={colors.shadeDark} strokeWidth="0.5" opacity="0.3" />
+          <line x1="36" y1="13" x2="30" y2="55" stroke={colors.shadeDark} strokeWidth="0.3" opacity="0.2" />
+          <line x1="54" y1="13" x2="60" y2="55" stroke={colors.shadeDark} strokeWidth="0.3" opacity="0.2" />
+
+          {/* Interior iluminado */}
+          <path d="M20 52 L70 52 L72 55 Q45 62 18 55 Z" fill={`url(#${id}-shadeInner)`} />
+
+          {/* Aro metálico inferior */}
+          <ellipse cx="45" cy="55" rx="30" ry="4" fill={colors.metalDark} />
+          <ellipse cx="45" cy="54" rx="30" ry="4" fill={colors.metal} />
+
+          {/* Glow de la bombilla */}
+          {isOn && (
+            <ellipse cx="45" cy="60" rx="12" ry="8" fill="rgba(255,220,150,0.6)" filter={`url(#${id}-bulbGlow)`} />
+          )}
+
+          {/* Bombilla */}
+          <ellipse cx="45" cy="60" rx="6" ry="7" fill={`url(#${id}-bulbGrad)`} />
+          <ellipse cx="43" cy="57" rx="2" ry="2" fill="white" opacity={isOn ? 0.6 : 0.2} />
+
+          {/* Casquillo */}
+          <rect x="42" y="52" width="6" height="4" rx="1" fill={colors.metalDark} />
+          <line x1="42" y1="53" x2="48" y2="53" stroke={colors.metal} strokeWidth="0.5" />
+          <line x1="42" y1="54.5" x2="48" y2="54.5" stroke={colors.metal} strokeWidth="0.5" />
         </svg>
 
-        {/* Pantalla de la lámpara (shade) */}
-        <div
-          className="relative"
-          style={{
-            width: '70px',
-            height: '45px',
-          }}
-        >
-          {/* Forma de la pantalla - cónica con textura de tela/lino */}
-          <svg width="70" height="45" viewBox="0 0 70 45" className="absolute top-0 left-0">
-            <defs>
-              {/* Gradiente de la pantalla */}
-              <linearGradient id="shadeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor={colors.shadeLight} />
-                <stop offset="30%" stopColor={colors.shade} />
-                <stop offset="70%" stopColor={colors.shade} />
-                <stop offset="100%" stopColor={colors.shadeDark} />
-              </linearGradient>
-              {/* Patrón de textura de lino */}
-              <pattern id="linenTexture" patternUnits="userSpaceOnUse" width="4" height="4">
-                <rect width="4" height="4" fill={colors.shade} />
-                <line x1="0" y1="0" x2="4" y2="0" stroke={colors.shadeLight} strokeWidth="0.3" opacity="0.3" />
-                <line x1="0" y1="2" x2="4" y2="2" stroke={colors.shadeDark} strokeWidth="0.2" opacity="0.2" />
-              </pattern>
-              {/* Resplandor interior cuando está encendida */}
-              <radialGradient id="innerGlow" cx="50%" cy="100%" r="80%">
-                <stop offset="0%" stopColor={isNight ? colors.bulbOff : colors.bulbOn} stopOpacity={isNight ? 0 : 0.4} />
-                <stop offset="100%" stopColor={isNight ? colors.bulbOff : colors.bulbOn} stopOpacity="0" />
-              </radialGradient>
-            </defs>
-
-            {/* Forma trapezoidal de la pantalla */}
-            <path
-              d="M15 0 L55 0 L65 42 Q35 48 5 42 Z"
-              fill="url(#shadeGrad)"
-            />
-            {/* Textura superpuesta */}
-            <path
-              d="M15 0 L55 0 L65 42 Q35 48 5 42 Z"
-              fill="url(#linenTexture)"
-              opacity="0.5"
-            />
-            {/* Borde superior metálico */}
-            <path
-              d="M14 0 L56 0 L56 3 L14 3 Z"
-              fill={colors.metal}
-            />
-            {/* Resplandor interior */}
-            <ellipse
-              cx="35"
-              cy="35"
-              rx="25"
-              ry="15"
-              fill="url(#innerGlow)"
-            />
-          </svg>
-
-          {/* Efecto de luz cuando está encendido (día) */}
-          {!isNight && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="absolute"
-              style={{
-                bottom: '-10px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: '50px',
-                height: '30px',
-                background: `radial-gradient(ellipse at center, ${colors.glowColor} 0%, transparent 70%)`,
-                filter: 'blur(8px)',
-                pointerEvents: 'none',
-              }}
-            />
-          )}
-        </div>
-
-        {/* Bombilla visible por debajo */}
-        <div className="relative" style={{ marginTop: '-8px' }}>
+        {/* Halo de luz suave debajo de la lámpara */}
+        {isOn && (
           <motion.div
-            animate={{
-              boxShadow: isNight
-                ? 'none'
-                : `0 0 20px ${colors.glowColor}, 0 0 40px rgba(255, 200, 100, 0.3)`,
-            }}
-            transition={{ duration: 0.5 }}
-            className="rounded-full"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.7 }}
+            className="absolute pointer-events-none"
             style={{
-              width: '16px',
-              height: '20px',
-              background: isNight
-                ? `radial-gradient(ellipse at 30% 30%, #5a5045 0%, ${colors.bulbOff} 100%)`
-                : `radial-gradient(ellipse at 30% 30%, #FFFEF5 0%, ${colors.bulbOn} 100%)`,
-              borderRadius: '50% 50% 45% 45%',
-            }}
-          />
-          {/* Casquillo de la bombilla */}
-          <div
-            style={{
-              width: '10px',
-              height: '6px',
-              margin: '-2px auto 0',
-              background: `linear-gradient(90deg, ${colors.metalDark} 0%, ${colors.metal} 50%, ${colors.metalDark} 100%)`,
-              borderRadius: '0 0 3px 3px',
-            }}
-          />
-        </div>
-
-        {/* Cordón de tiro (pull cord) */}
-        <motion.div
-          animate={cordControls}
-          className="flex flex-col items-center cursor-pointer"
-          onClick={handlePull}
-          style={{ marginTop: '8px' }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          {/* Cordón */}
-          <div
-            style={{
-              width: '2px',
+              bottom: '-15px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '70px',
               height: '35px',
-              background: `linear-gradient(180deg, ${colors.cord} 0%, ${colors.cord} 80%, ${colors.cordKnob} 100%)`,
+              background: 'radial-gradient(ellipse at center, rgba(255,220,150,0.4) 0%, rgba(255,200,120,0.2) 40%, transparent 70%)',
+              filter: 'blur(8px)',
             }}
           />
-          {/* Bolita decorativa del cordón (wooden bead) */}
-          <div
-            className="rounded-full relative"
-            style={{
-              width: '14px',
-              height: '14px',
-              background: `radial-gradient(ellipse at 30% 30%, ${colors.metal} 0%, ${colors.cordKnob} 50%, ${colors.metalDark} 100%)`,
-              boxShadow: `
-                inset 0 -2px 4px rgba(0,0,0,0.3),
-                0 2px 4px rgba(0,0,0,0.3)
-              `,
-            }}
-          >
-            {/* Agujero del cordón */}
-            <div
-              className="absolute rounded-full"
-              style={{
-                width: '3px',
-                height: '3px',
-                top: '2px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                background: colors.cord,
-              }}
-            />
-          </div>
+        )}
+      </div>
 
-          {/* Indicador de override */}
-          {isOverride && (
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 1, repeat: Infinity }}
-              className="absolute rounded-full"
-              style={{
-                width: '8px',
-                height: '8px',
-                bottom: '-12px',
-                background: '#8B5CF6',
-                boxShadow: '0 0 8px #8B5CF6',
-              }}
-            />
-          )}
-        </motion.div>
-      </motion.div>
-
-      {/* Cono de luz proyectado (solo de día/encendido) */}
-      {!isNight && (
+      {/* Luz proyectada hacia abajo - forma más natural */}
+      {isOn && (
         <motion.div
-          initial={{ opacity: 0, scaleY: 0 }}
-          animate={{ opacity: 0.15, scaleY: 1 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
           className="absolute pointer-events-none"
           style={{
             top: '100%',
             left: '50%',
             transform: 'translateX(-50%)',
-            width: '0',
-            height: '0',
-            borderLeft: '40px solid transparent',
-            borderRight: '40px solid transparent',
-            borderTop: '120px solid rgba(255, 220, 150, 0.3)',
-            filter: 'blur(10px)',
           }}
-        />
+        >
+          {/* Cono de luz suave y natural */}
+          <div
+            style={{
+              width: '120px',
+              height: '180px',
+              background: 'radial-gradient(ellipse 60% 100% at 50% 0%, rgba(255, 220, 150, 0.15) 0%, rgba(255, 200, 120, 0.08) 40%, transparent 70%)',
+              filter: 'blur(15px)',
+            }}
+          />
+        </motion.div>
       )}
     </motion.div>
   )
