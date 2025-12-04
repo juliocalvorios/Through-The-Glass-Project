@@ -25,6 +25,7 @@ export default function Home() {
   // Override para demo/testing
   const [timeOverride, setTimeOverride] = useState<TimeOfDay | null>(null)
   const [conditionOverride, setConditionOverride] = useState<WeatherCondition | null>(null)
+  const [curtainsOpen, setCurtainsOpen] = useState(true)
 
   // Estado actual (real o override)
   const currentTimeOfDay = timeOverride || time.timeOfDay
@@ -209,7 +210,7 @@ export default function Home() {
         />
       </div>
 
-      {/* Lámpara de techo con toggle día/noche (izquierda) */}
+      {/* Lámpara de techo (izquierda) */}
       <div className="absolute top-0 left-16 z-30">
         <DayNightToggle
           timeOfDay={currentTimeOfDay}
@@ -268,10 +269,22 @@ export default function Home() {
         </span>
       </motion.div>
 
+      {/* Interruptor de pared (luz y cortinas) */}
+      <WallSwitch
+        isNight={isNight}
+        lightOn={!isNight}
+        curtainsOpen={curtainsOpen}
+        onLightToggle={handleTimeToggle}
+        onCurtainsToggle={() => setCurtainsOpen(!curtainsOpen)}
+        isLightOverride={timeOverride !== null}
+      />
+
       {/* La ventana Nordic Cozy */}
       <NordicWindow
         timeOfDay={currentTimeOfDay}
         condition={currentCondition}
+        curtainsOpen={curtainsOpen}
+        onCurtainsToggle={() => setCurtainsOpen(!curtainsOpen)}
       >
         <WeatherEffects
           condition={currentCondition}
@@ -612,5 +625,236 @@ function SoundIcon({ enabled, isNight }: { enabled: boolean; isNight: boolean })
       <line x1="23" y1="9" x2="17" y2="15" />
       <line x1="17" y1="9" x2="23" y2="15" />
     </svg>
+  )
+}
+
+// Interruptor de pared estilo cabaña con 2 botones
+function WallSwitch({
+  isNight,
+  lightOn,
+  curtainsOpen,
+  onLightToggle,
+  onCurtainsToggle,
+  isLightOverride,
+}: {
+  isNight: boolean
+  lightOn: boolean
+  curtainsOpen: boolean
+  onLightToggle: () => void
+  onCurtainsToggle: () => void
+  isLightOverride: boolean
+}) {
+  const colors = {
+    plate: isNight ? '#2a1818' : '#6B3A3A',
+    plateLight: isNight ? '#3a2222' : '#7A4545',
+    plateDark: isNight ? '#1a0f0f' : '#4A2525',
+    switch: isNight ? '#3a2828' : '#8B5A5A',
+    switchActive: isNight ? '#D4A574' : '#C9A86C',
+    screw: isNight ? '#8B7355' : '#A67C52',
+    text: isNight ? 'rgba(232,213,196,0.5)' : 'rgba(60,30,20,0.6)',
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.8, delay: 0.5 }}
+      className="absolute z-50"
+      style={{
+        left: '80px',
+        top: '50%',
+        transform: 'translateY(-50%)',
+      }}
+    >
+      {/* Placa del interruptor */}
+      <div
+        className="relative p-2 rounded-lg"
+        style={{
+          background: `linear-gradient(145deg, ${colors.plateLight} 0%, ${colors.plate} 50%, ${colors.plateDark} 100%)`,
+          boxShadow: `
+            inset 0 1px 0 rgba(255,255,255,0.08),
+            0 4px 12px rgba(0,0,0,0.5),
+            0 8px 24px rgba(0,0,0,0.3)
+          `,
+          width: '70px',
+        }}
+      >
+        {/* Tornillo superior */}
+        <div
+          className="absolute rounded-full"
+          style={{
+            width: '8px',
+            height: '8px',
+            top: '6px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: `radial-gradient(ellipse at 30% 30%, ${colors.screw} 0%, #5a4030 100%)`,
+            boxShadow: 'inset 0 -1px 2px rgba(0,0,0,0.4)',
+          }}
+        >
+          {/* Ranura del tornillo */}
+          <div
+            className="absolute"
+            style={{
+              width: '6px',
+              height: '1px',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%) rotate(45deg)',
+              background: '#3a2a20',
+            }}
+          />
+        </div>
+
+        {/* Contenedor de los interruptores */}
+        <div className="flex flex-col gap-3 mt-4 mb-4">
+          {/* Interruptor de luz */}
+          <motion.button
+            onClick={onLightToggle}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="relative rounded-md cursor-pointer"
+            style={{
+              height: '36px',
+              background: `linear-gradient(180deg, ${colors.plateDark} 0%, ${colors.plate} 100%)`,
+              boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.3)',
+            }}
+            title="Luz"
+          >
+            {/* El switch que se mueve */}
+            <motion.div
+              animate={{ y: lightOn ? -2 : 2 }}
+              transition={{ duration: 0.15 }}
+              className="absolute inset-1 rounded flex items-center justify-center"
+              style={{
+                background: lightOn
+                  ? `linear-gradient(180deg, ${colors.switchActive} 0%, #b8956c 100%)`
+                  : `linear-gradient(180deg, ${colors.switch} 0%, ${colors.plateDark} 100%)`,
+                boxShadow: lightOn
+                  ? `0 0 8px rgba(212,165,116,0.5), inset 0 1px 0 rgba(255,255,255,0.2)`
+                  : 'inset 0 1px 2px rgba(0,0,0,0.3)',
+              }}
+            >
+              {/* Icono de luz */}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={lightOn ? '#2a1818' : colors.text} strokeWidth="2" strokeLinecap="round">
+                <circle cx="12" cy="12" r="4" />
+                {lightOn && (
+                  <>
+                    <path d="M12 2v2" />
+                    <path d="M12 20v2" />
+                    <path d="M4.93 4.93l1.41 1.41" />
+                    <path d="M17.66 17.66l1.41 1.41" />
+                    <path d="M2 12h2" />
+                    <path d="M20 12h2" />
+                    <path d="M6.34 17.66l-1.41 1.41" />
+                    <path d="M19.07 4.93l-1.41 1.41" />
+                  </>
+                )}
+              </svg>
+            </motion.div>
+
+            {/* Indicador de override */}
+            {isLightOverride && (
+              <motion.div
+                className="absolute -top-1 -right-1 w-2 h-2 rounded-full"
+                style={{ background: '#8B5CF6', boxShadow: '0 0 6px #8B5CF6' }}
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 1, repeat: Infinity }}
+              />
+            )}
+          </motion.button>
+
+          {/* Interruptor de cortinas */}
+          <motion.button
+            onClick={onCurtainsToggle}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="relative rounded-md cursor-pointer"
+            style={{
+              height: '36px',
+              background: `linear-gradient(180deg, ${colors.plateDark} 0%, ${colors.plate} 100%)`,
+              boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.3)',
+            }}
+            title="Cortinas"
+          >
+            {/* El switch que se mueve */}
+            <motion.div
+              animate={{ y: curtainsOpen ? -2 : 2 }}
+              transition={{ duration: 0.15 }}
+              className="absolute inset-1 rounded flex items-center justify-center"
+              style={{
+                background: curtainsOpen
+                  ? `linear-gradient(180deg, ${colors.switchActive} 0%, #b8956c 100%)`
+                  : `linear-gradient(180deg, ${colors.switch} 0%, ${colors.plateDark} 100%)`,
+                boxShadow: curtainsOpen
+                  ? `0 0 8px rgba(212,165,116,0.5), inset 0 1px 0 rgba(255,255,255,0.2)`
+                  : 'inset 0 1px 2px rgba(0,0,0,0.3)',
+              }}
+            >
+              {/* Icono de cortinas */}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={curtainsOpen ? '#2a1818' : colors.text} strokeWidth="2" strokeLinecap="round">
+                {curtainsOpen ? (
+                  <>
+                    <line x1="2" y1="3" x2="22" y2="3" />
+                    <path d="M4 3v14c0 0 1-2 3-2" />
+                    <path d="M20 3v14c0 0-1-2-3-2" />
+                  </>
+                ) : (
+                  <>
+                    <line x1="2" y1="3" x2="22" y2="3" />
+                    <path d="M6 3v17" />
+                    <path d="M10 3v17" />
+                    <path d="M14 3v17" />
+                    <path d="M18 3v17" />
+                  </>
+                )}
+              </svg>
+            </motion.div>
+          </motion.button>
+        </div>
+
+        {/* Tornillo inferior */}
+        <div
+          className="absolute rounded-full"
+          style={{
+            width: '8px',
+            height: '8px',
+            bottom: '6px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: `radial-gradient(ellipse at 30% 30%, ${colors.screw} 0%, #5a4030 100%)`,
+            boxShadow: 'inset 0 -1px 2px rgba(0,0,0,0.4)',
+          }}
+        >
+          {/* Ranura del tornillo */}
+          <div
+            className="absolute"
+            style={{
+              width: '6px',
+              height: '1px',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%) rotate(-45deg)',
+              background: '#3a2a20',
+            }}
+          />
+        </div>
+
+        {/* Textura de madera */}
+        <svg className="absolute inset-0 w-full h-full pointer-events-none rounded-lg overflow-hidden" style={{ opacity: 0.1 }}>
+          <defs>
+            <pattern id="switchWoodGrain" patternUnits="userSpaceOnUse" width="40" height="6">
+              <path
+                d="M0,3 Q10,1 20,3 T40,3"
+                stroke={isNight ? '#4a2828' : '#3A2020'}
+                strokeWidth="0.5"
+                fill="none"
+              />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#switchWoodGrain)" />
+        </svg>
+      </div>
+    </motion.div>
   )
 }
