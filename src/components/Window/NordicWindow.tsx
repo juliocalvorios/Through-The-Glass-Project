@@ -1,7 +1,7 @@
 'use client'
 
 import { memo, ReactNode, useRef, useEffect, useState } from 'react'
-import { motion, useMotionValue, useSpring } from 'framer-motion'
+import { motion, useMotionValue, useSpring, AnimatePresence } from 'framer-motion'
 import { TimeOfDay, WeatherCondition } from '@/types'
 
 interface NordicWindowProps {
@@ -13,6 +13,7 @@ interface NordicWindowProps {
 function NordicWindowComponent({ children, timeOfDay, condition }: NordicWindowProps) {
   const isNight = timeOfDay === 'night' || timeOfDay === 'dusk'
   const windowRef = useRef<HTMLDivElement>(null)
+  const [curtainsOpen, setCurtainsOpen] = useState(true)
 
   // Para el reflejo que sigue al cursor
   const mouseX = useMotionValue(0.5)
@@ -197,7 +198,12 @@ function NordicWindowComponent({ children, timeOfDay, condition }: NordicWindowP
       {/* ============================================
           CORTINAS
           ============================================ */}
-      <Curtains isNight={isNight} condition={condition} />
+      <Curtains
+        isNight={isNight}
+        condition={condition}
+        isOpen={curtainsOpen}
+        onToggle={() => setCurtainsOpen(!curtainsOpen)}
+      />
 
       {/* ============================================
           ALFÉIZAR (Windowsill)

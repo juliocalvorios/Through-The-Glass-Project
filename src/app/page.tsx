@@ -1,19 +1,20 @@
 'use client'
 
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   AnalogClock,
   DayNightToggle,
   NordicWindow,
-  Rain,
-  Snow,
   Stars,
-  Lightning,
-  Sun,
   Aurora,
+  Clouds,
+  ThreeSnow,
+  ThreeRain,
+  ThreeSun,
+  ThreeFog,
 } from '@/components'
-import { useLocation, useWeather, useTime } from '@/hooks'
+import { useLocation, useWeather, useTime, useAmbientSound } from '@/hooks'
 import { TimeOfDay, WeatherCondition } from '@/types'
 
 export default function Home() {
@@ -29,6 +30,13 @@ export default function Home() {
   const currentTimeOfDay = timeOverride || time.timeOfDay
   const currentCondition = conditionOverride || weather?.condition || 'clear'
   const isNight = currentTimeOfDay === 'night' || currentTimeOfDay === 'dusk'
+
+  // Sound system
+  const { isEnabled: soundEnabled, toggleSound, playThunder } = useAmbientSound(
+    currentCondition,
+    currentTimeOfDay,
+    { enabled: false }
+  )
 
   // Toggle día/noche
   const handleTimeToggle = () => {
@@ -201,8 +209,8 @@ export default function Home() {
         />
       </div>
 
-      {/* Toggle día/noche */}
-      <div className="absolute top-56 right-12 z-30">
+      {/* Lámpara de techo con toggle día/noche (izquierda) */}
+      <div className="absolute top-0 left-16 z-30">
         <DayNightToggle
           timeOfDay={currentTimeOfDay}
           isOverride={timeOverride !== null}
@@ -219,6 +227,27 @@ export default function Home() {
           isNight={isNight}
         />
       </div>
+
+      {/* Sound Toggle Button */}
+      <motion.button
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.5 }}
+        onClick={toggleSound}
+        className="absolute top-8 left-8 z-30 w-10 h-10 rounded-lg flex items-center justify-center transition-all"
+        style={{
+          background: isNight ? 'rgba(42, 24, 24, 0.8)' : 'rgba(107, 58, 58, 0.8)',
+          border: `1px solid ${isNight ? '#1a0f0f' : '#4A2525'}`,
+          boxShadow: soundEnabled
+            ? `0 0 12px ${isNight ? 'rgba(212,165,116,0.4)' : 'rgba(201,168,108,0.4)'}`
+            : '0 2px 8px rgba(0,0,0,0.3)',
+        }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        title={soundEnabled ? 'Mute sounds' : 'Enable sounds'}
+      >
+        <SoundIcon enabled={soundEnabled} isNight={isNight} />
+      </motion.button>
 
       {/* Crédito discreto */}
       <motion.div
@@ -247,6 +276,7 @@ export default function Home() {
         <WeatherEffects
           condition={currentCondition}
           timeOfDay={currentTimeOfDay}
+          onLightningStrike={playThunder}
         />
       </NordicWindow>
 
@@ -265,48 +295,92 @@ export default function Home() {
   )
 }
 
-// Efectos del clima
+// Wrapper para transiciones smooth
+function FadeWrapper({ show, children }: { show: boolean; children: React.ReactNode }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: show ? 1 : 0 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 1.5, ease: 'easeInOut' }}
+      style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+// Efectos del clima con transiciones smooth
 function WeatherEffects({
   condition,
-  timeOfDay
+  timeOfDay,
+  onLightningStrike,
 }: {
   condition: WeatherCondition
   timeOfDay: TimeOfDay
+  onLightningStrike?: () => void
 }) {
   const isNight = timeOfDay === 'night' || timeOfDay === 'dusk'
 
   return (
-    <>
+    <AnimatePresence mode="wait">
       {/* Estrellas (noche clara) */}
       {isNight && condition !== 'storm' && condition !== 'rain' && condition !== 'fog' && (
-        <Stars count={condition === 'cloudy' ? 20 : 50} showMoon={condition !== 'aurora'} />
+        <FadeWrapper key="stars" show={true}>
+          <Stars count={condition === 'cloudy' ? 20 : 50} showMoon={condition !== 'aurora'} />
+        </FadeWrapper>
       )}
 
-      {/* Aurora Boreal (noche + aurora) */}
+      {/* Aurora Boreal */}
       {condition === 'aurora' && isNight && (
-        <>
+        <FadeWrapper key="aurora" show={true}>
           <Stars count={60} showMoon={false} />
           <Aurora intensity="high" />
-        </>
+        </FadeWrapper>
       )}
 
       {/* Sol */}
-      {!isNight && condition === 'clear' && <Sun />}
+      {!isNight && condition === 'clear' && (
+        <FadeWrapper key="sun" show={true}>
+          <ThreeSun intensity="bright" />
+        </FadeWrapper>
+      )}
+
+      {/* Nubes */}
+      {condition === 'cloudy' && (
+        <FadeWrapper key="clouds" show={true}>
+          <Clouds density="moderate" isNight={isNight} />
+        </FadeWrapper>
+      )}
 
       {/* Lluvia */}
-      {condition === 'rain' && <Rain intensity="moderate" />}
+      {condition === 'rain' && (
+        <FadeWrapper key="rain" show={true}>
+          <ThreeRain intensity="moderate" />
+        </FadeWrapper>
+      )}
 
       {/* Nieve */}
-      {condition === 'snow' && <Snow intensity="moderate" />}
+      {condition === 'snow' && (
+        <FadeWrapper key="snow" show={true}>
+          <ThreeSnow intensity="moderate" isNight={isNight} />
+        </FadeWrapper>
+      )}
+
+      {/* Niebla */}
+      {condition === 'fog' && (
+        <FadeWrapper key="fog" show={true}>
+          <ThreeFog intensity="moderate" isNight={isNight} />
+        </FadeWrapper>
+      )}
 
       {/* Tormenta */}
       {condition === 'storm' && (
-        <>
-          <Rain intensity="heavy" isStorm />
-          <Lightning frequency={5} />
-        </>
+        <FadeWrapper key="storm" show={true}>
+          <ThreeRain intensity="heavy" isStorm />
+        </FadeWrapper>
       )}
-    </>
+    </AnimatePresence>
   )
 }
 
@@ -514,6 +588,29 @@ function AuroraIcon() {
       <path d="M4 20c0-8 4-16 8-16s8 8 8 16" />
       <path d="M8 20c0-5 2-10 4-10s4 5 4 10" />
       <path d="M12 20v-6" />
+    </svg>
+  )
+}
+
+// Sound toggle icon
+function SoundIcon({ enabled, isNight }: { enabled: boolean; isNight: boolean }) {
+  const color = isNight ? '#E8D5C4' : '#F5EBE0'
+
+  if (enabled) {
+    return (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill={color} fillOpacity="0.3" />
+        <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+      </svg>
+    )
+  }
+
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.6">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+      <line x1="23" y1="9" x2="17" y2="15" />
+      <line x1="17" y1="9" x2="23" y2="15" />
     </svg>
   )
 }

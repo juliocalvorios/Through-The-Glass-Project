@@ -524,6 +524,10 @@ function MinuteMarkers({ colors, isNight }: { colors: any; isNight: boolean }) {
 // AGUJA DE HORA (estilo spade/flecha)
 // ============================================
 function HourHand({ angle, colors, isShadow = false }: { angle: number; colors: any; isShadow?: boolean }) {
+  const handLength = 32
+  const tailLength = 8
+  const totalHeight = handLength + tailLength
+
   return (
     <motion.div
       className="absolute z-20"
@@ -531,9 +535,11 @@ function HourHand({ angle, colors, isShadow = false }: { angle: number; colors: 
         left: '50%',
         top: '50%',
         width: '8px',
-        height: '38px',
-        transformOrigin: 'center bottom',
-        transform: isShadow ? `translate(-50%, -100%) translate(2px, 2px)` : 'translate(-50%, -100%)',
+        height: `${totalHeight}px`,
+        marginLeft: '-4px',
+        marginTop: `-${handLength}px`,
+        transformOrigin: `center ${handLength}px`,
+        transform: isShadow ? 'translate(2px, 2px)' : undefined,
       }}
       animate={{ rotate: angle }}
       transition={{ type: 'spring', stiffness: 80, damping: 15 }}
@@ -541,18 +547,27 @@ function HourHand({ angle, colors, isShadow = false }: { angle: number; colors: 
       {/* Forma de flecha/spade */}
       <svg
         width="8"
-        height="38"
-        viewBox="0 0 8 38"
+        height={totalHeight}
+        viewBox={`0 0 8 ${totalHeight}`}
         fill="none"
         style={{ filter: isShadow ? 'blur(1px)' : 'none' }}
       >
+        {/* Punta y cuerpo principal */}
         <path
-          d="M4 0 L7 10 L5.5 10 L5.5 38 L2.5 38 L2.5 10 L1 10 Z"
+          d={`M4 0 L7 10 L5.5 10 L5.5 ${handLength} L2.5 ${handLength} L2.5 10 L1 10 Z`}
+          fill={isShadow ? 'rgba(0,0,0,0.4)' : colors.face.text}
+        />
+        {/* Cola de contrapeso */}
+        <rect
+          x="3"
+          y={handLength}
+          width="2"
+          height={tailLength}
           fill={isShadow ? 'rgba(0,0,0,0.4)' : colors.face.text}
         />
         {!isShadow && (
           <path
-            d="M4 1 L6 9 L5 9 L5 37 L4 37 L4 9 L3 9 Z"
+            d={`M4 1 L6 9 L5 9 L5 ${handLength - 1} L4 ${handLength - 1} L4 9 L3 9 Z`}
             fill={colors.metal.gold}
             opacity="0.3"
           />
@@ -566,6 +581,10 @@ function HourHand({ angle, colors, isShadow = false }: { angle: number; colors: 
 // AGUJA DE MINUTO (más larga y elegante)
 // ============================================
 function MinuteHand({ angle, colors, isShadow = false }: { angle: number; colors: any; isShadow?: boolean }) {
+  const handLength = 46
+  const tailLength = 10
+  const totalHeight = handLength + tailLength
+
   return (
     <motion.div
       className="absolute z-21"
@@ -573,27 +592,38 @@ function MinuteHand({ angle, colors, isShadow = false }: { angle: number; colors
         left: '50%',
         top: '50%',
         width: '6px',
-        height: '52px',
-        transformOrigin: 'center bottom',
-        transform: isShadow ? `translate(-50%, -100%) translate(2px, 2px)` : 'translate(-50%, -100%)',
+        height: `${totalHeight}px`,
+        marginLeft: '-3px',
+        marginTop: `-${handLength}px`,
+        transformOrigin: `center ${handLength}px`,
+        transform: isShadow ? 'translate(2px, 2px)' : undefined,
       }}
       animate={{ rotate: angle }}
       transition={{ type: 'spring', stiffness: 80, damping: 15 }}
     >
       <svg
         width="6"
-        height="52"
-        viewBox="0 0 6 52"
+        height={totalHeight}
+        viewBox={`0 0 6 ${totalHeight}`}
         fill="none"
         style={{ filter: isShadow ? 'blur(1px)' : 'none' }}
       >
+        {/* Punta y cuerpo principal */}
         <path
-          d="M3 0 L5.5 8 L4 8 L4 52 L2 52 L2 8 L0.5 8 Z"
+          d={`M3 0 L5.5 8 L4 8 L4 ${handLength} L2 ${handLength} L2 8 L0.5 8 Z`}
+          fill={isShadow ? 'rgba(0,0,0,0.4)' : colors.face.text}
+        />
+        {/* Cola de contrapeso */}
+        <rect
+          x="2"
+          y={handLength}
+          width="2"
+          height={tailLength}
           fill={isShadow ? 'rgba(0,0,0,0.4)' : colors.face.text}
         />
         {!isShadow && (
           <path
-            d="M3 1 L5 7.5 L3.5 7.5 L3.5 51 L3 51 L3 7.5 L2 7.5 Z"
+            d={`M3 1 L5 7.5 L3.5 7.5 L3.5 ${handLength - 1} L3 ${handLength - 1} L3 7.5 L2 7.5 Z`}
             fill={colors.metal.gold}
             opacity="0.25"
           />
@@ -607,37 +637,51 @@ function MinuteHand({ angle, colors, isShadow = false }: { angle: number; colors
 // AGUJA DE SEGUNDO (roja, delgada, clásica)
 // ============================================
 function SecondHand({ angle, colors, isNight }: { angle: number; colors: any; isNight: boolean }) {
+  const handLength = 50
+  const tailLength = 14
+  const totalHeight = handLength + tailLength
+
   return (
     <motion.div
       className="absolute z-22"
       style={{
         left: '50%',
         top: '50%',
-        transformOrigin: 'center 8px',
-        transform: 'translate(-50%, -56px)',
+        width: '5px',
+        height: `${totalHeight}px`,
+        marginLeft: '-2.5px',
+        marginTop: `-${handLength}px`,
+        transformOrigin: `center ${handLength}px`,
       }}
       animate={{ rotate: angle }}
       transition={{ duration: 0.1, ease: 'linear' }}
     >
-      <svg width="3" height="64" viewBox="0 0 3 64" fill="none">
-        {/* Cola de contrapeso */}
-        <circle
-          cx="1.5"
-          cy="60"
-          r="2.5"
-          fill={isNight ? '#8B4513' : '#B22222'}
-        />
+      <svg width="5" height={totalHeight} viewBox={`0 0 5 ${totalHeight}`} fill="none">
         {/* Cuerpo de la aguja */}
         <rect
-          x="1"
+          x="2"
           y="0"
           width="1"
-          height="60"
+          height={handLength}
           fill={isNight ? '#8B4513' : '#B22222'}
         />
         {/* Punta */}
         <path
-          d="M1.5 0 L2.5 4 L0.5 4 Z"
+          d="M2.5 0 L3.5 5 L1.5 5 Z"
+          fill={isNight ? '#8B4513' : '#B22222'}
+        />
+        {/* Cola de contrapeso */}
+        <rect
+          x="1.5"
+          y={handLength}
+          width="2"
+          height={tailLength - 4}
+          fill={isNight ? '#8B4513' : '#B22222'}
+        />
+        <circle
+          cx="2.5"
+          cy={totalHeight - 3}
+          r="2.5"
           fill={isNight ? '#8B4513' : '#B22222'}
         />
       </svg>
