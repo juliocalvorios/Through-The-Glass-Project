@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, ReactNode, useRef, useEffect, useState } from 'react'
+import { memo, ReactNode, useRef, useEffect } from 'react'
 import { motion, useMotionValue, useSpring, AnimatePresence } from 'framer-motion'
 import { TimeOfDay, WeatherCondition } from '@/types'
 
@@ -8,12 +8,13 @@ interface NordicWindowProps {
   children: ReactNode
   timeOfDay: TimeOfDay
   condition: WeatherCondition
+  curtainsOpen?: boolean
+  onCurtainsToggle?: () => void
 }
 
-function NordicWindowComponent({ children, timeOfDay, condition }: NordicWindowProps) {
+function NordicWindowComponent({ children, timeOfDay, condition, curtainsOpen = true, onCurtainsToggle }: NordicWindowProps) {
   const isNight = timeOfDay === 'night' || timeOfDay === 'dusk'
   const windowRef = useRef<HTMLDivElement>(null)
-  const [curtainsOpen, setCurtainsOpen] = useState(true)
 
   // Para el reflejo que sigue al cursor
   const mouseX = useMotionValue(0.5)
@@ -202,7 +203,7 @@ function NordicWindowComponent({ children, timeOfDay, condition }: NordicWindowP
         isNight={isNight}
         condition={condition}
         isOpen={curtainsOpen}
-        onToggle={() => setCurtainsOpen(!curtainsOpen)}
+        onToggle={onCurtainsToggle || (() => {})}
       />
 
       {/* ============================================
@@ -490,7 +491,7 @@ function WindowMuntins({ colors, isNight }: { colors: any; isNight: boolean }) {
   const muntinDepth = isNight ? 0.1 : 0.25
 
   return (
-    <div className="absolute inset-0 pointer-events-none z-50">
+    <div className="absolute inset-0 pointer-events-none z-30">
       {/* División vertical central */}
       <div
         className="absolute left-1/2 top-0 bottom-0 -translate-x-1/2"
@@ -584,29 +585,49 @@ function WindowMuntins({ colors, isNight }: { colors: any; isNight: boolean }) {
 // ============================================
 // CORTINAS CON DRAPEADO REAL
 // ============================================
-function Curtains({ isNight, condition }: { isNight: boolean; condition: WeatherCondition }) {
-  const hasWind = condition === 'storm'
+function Curtains({
+  isNight,
+  condition,
+  isOpen,
+  onToggle,
+}: {
+  isNight: boolean
+  condition: WeatherCondition
+  isOpen: boolean
+  onToggle: () => void
+}) {
+  const hasWind = condition === 'storm' && isOpen
 
   // Colores de las cortinas - Lino nórdico natural (contrasta con madera roja)
   const curtainBase = isNight ? '#2a2525' : '#E8DDD5'
   const curtainShadow = isNight ? '#1a1515' : '#D0C4BC'
   const curtainHighlight = isNight ? '#3a3232' : '#F5EDE5'
 
-  // Número de pliegues
-  const foldCount = 5
+  // Número de pliegues - más cuando está cerrada para verse más llena
+  const foldCount = isOpen ? 5 : 8
+
+  // Ancho de las cortinas: 12% cuando abiertas, 50% cuando cerradas (cada lado cubre exactamente la mitad)
+  const curtainWidth = isOpen ? '12%' : '50%'
 
   return (
     <>
       {/* CORTINA IZQUIERDA */}
       <motion.div
-        className="absolute left-0 top-0 bottom-0 z-40 pointer-events-none"
+        className="absolute left-0 top-0 bottom-0 z-40 cursor-pointer overflow-hidden"
         style={{
-          width: '12%',
           marginTop: '-1%',
           marginBottom: '8%',
         }}
-        animate={hasWind ? { x: [0, 6, 0, 4, 0] } : {}}
-        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+        initial={false}
+        animate={{
+          width: curtainWidth,
+          x: hasWind ? [0, 6, 0, 4, 0] : 0,
+        }}
+        transition={hasWind
+          ? { duration: 3, repeat: Infinity, ease: 'easeInOut' }
+          : { duration: 1.2, ease: 'easeInOut' }
+        }
+        onClick={onToggle}
       >
         {/* Pliegues de la cortina */}
         <div className="relative w-full h-full">
@@ -668,27 +689,36 @@ function Curtains({ isNight, condition }: { isNight: boolean; condition: Weather
           />
         </div>
 
-        {/* Recogido/amarre de la cortina */}
-        <div
+        {/* Recogido/amarre de la cortina - solo visible cuando está abierta */}
+        <motion.div
           className="absolute right-0 top-1/4 w-4 h-20"
           style={{
             background: `linear-gradient(90deg, ${curtainShadow} 0%, ${curtainBase} 50%, ${curtainShadow} 100%)`,
             borderRadius: '0 4px 4px 0',
             boxShadow: '2px 0 4px rgba(0,0,0,0.15)',
           }}
+          animate={{ opacity: isOpen ? 1 : 0, scale: isOpen ? 1 : 0.8 }}
+          transition={{ duration: 0.3 }}
         />
       </motion.div>
 
       {/* CORTINA DERECHA (espejo de la izquierda) */}
       <motion.div
-        className="absolute right-0 top-0 bottom-0 z-40 pointer-events-none"
+        className="absolute right-0 top-0 bottom-0 z-40 cursor-pointer overflow-hidden"
         style={{
-          width: '12%',
           marginTop: '-1%',
           marginBottom: '8%',
         }}
-        animate={hasWind ? { x: [0, -5, 0, -3, 0] } : {}}
-        transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }}
+        initial={false}
+        animate={{
+          width: curtainWidth,
+          x: hasWind ? [0, -5, 0, -3, 0] : 0,
+        }}
+        transition={hasWind
+          ? { duration: 3.2, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }
+          : { duration: 1.2, ease: 'easeInOut' }
+        }
+        onClick={onToggle}
       >
         <div className="relative w-full h-full">
           {[...Array(foldCount)].map((_, i) => {
@@ -746,19 +776,23 @@ function Curtains({ isNight, condition }: { isNight: boolean; condition: Weather
           />
         </div>
 
-        <div
+        {/* Recogido/amarre de la cortina - solo visible cuando está abierta */}
+        <motion.div
           className="absolute left-0 top-1/4 w-4 h-20"
           style={{
             background: `linear-gradient(270deg, ${curtainShadow} 0%, ${curtainBase} 50%, ${curtainShadow} 100%)`,
             borderRadius: '4px 0 0 4px',
             boxShadow: '-2px 0 4px rgba(0,0,0,0.15)',
           }}
+          animate={{ opacity: isOpen ? 1 : 0, scale: isOpen ? 1 : 0.8 }}
+          transition={{ duration: 0.3 }}
         />
       </motion.div>
 
       {/* BARRA DE CORTINA - Madera roja */}
       <div
-        className="absolute -top-3 -left-4 -right-4 h-4 z-50"
+        className="absolute -top-3 -left-4 -right-4 h-4 z-50 cursor-pointer"
+        onClick={onToggle}
         style={{
           background: `linear-gradient(
             180deg,
