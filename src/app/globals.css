@@ -1,0 +1,248 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   THROUGH THE GLASS - NORDIC COZY THEME
+   ============================================ */
+
+:root {
+  /* Colores Nordic Cozy */
+  --wall-day: #f5f0e6;
+  --wall-night: #1a1f2e;
+  --wood-light: #d4c4a8;
+  --wood-dark: #c9b896;
+  --wood-accent: #b8a882;
+  --linen: #e8e0d4;
+  --moss: #5c6b54;
+  --cream: #faf8f5;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   EFECTOS DE CLIMA
+   ============================================ */
+
+/* Gota de lluvia mejorada */
+.raindrop {
+  position: absolute;
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(174, 194, 224, 0.3) 30%,
+    rgba(174, 194, 224, 0.6) 70%,
+    rgba(200, 220, 240, 0.8) 100%
+  );
+  border-radius: 0 0 50% 50%;
+  pointer-events: none;
+  filter: blur(0.3px);
+}
+
+/* Gota en el cristal */
+.glass-drop {
+  position: absolute;
+  background: radial-gradient(
+    ellipse at 30% 30%,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(200, 220, 240, 0.3) 50%,
+    rgba(174, 194, 224, 0.2) 100%
+  );
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Copo de nieve */
+.snowflake {
+  position: absolute;
+  color: white;
+  text-shadow: 
+    0 0 3px rgba(255, 255, 255, 0.8),
+    0 0 6px rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Escarcha en el cristal */
+.frost {
+  position: absolute;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 70%
+  );
+  filter: blur(1px);
+  pointer-events: none;
+}
+
+/* Estrella titilante */
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
+}
+
+@keyframes twinkle {
+  0%, 100% { 
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+/* Llama de vela */
+.candle-flame {
+  filter: blur(0.5px);
+  mix-blend-mode: screen;
+}
+
+@keyframes flicker {
+  0%, 100% { 
+    transform: scale(1) rotate(0deg);
+    opacity: 0.9;
+  }
+  25% { 
+    transform: scale(1.05, 0.95) rotate(1deg);
+    opacity: 1;
+  }
+  50% { 
+    transform: scale(0.95, 1.05) rotate(-1deg);
+    opacity: 0.85;
+  }
+  75% { 
+    transform: scale(1.02) rotate(0.5deg);
+    opacity: 0.95;
+  }
+}
+
+/* ============================================
+   TEXTURA DE MADERA
+   ============================================ */
+
+.wood-texture {
+  background-image: 
+    repeating-linear-gradient(
+      87deg,
+      transparent 0px,
+      transparent 15px,
+      rgba(139, 90, 43, 0.05) 15px,
+      rgba(139, 90, 43, 0.05) 17px
+    ),
+    repeating-linear-gradient(
+      93deg,
+      transparent 0px,
+      transparent 25px,
+      rgba(139, 90, 43, 0.03) 25px,
+      rgba(139, 90, 43, 0.03) 26px
+    );
+}
+
+/* ============================================
+   TEXTURA DE LINO (CORTINAS)
+   ============================================ */
+
+.linen-texture {
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 2px,
+      rgba(0, 0, 0, 0.03) 2px,
+      rgba(0, 0, 0, 0.03) 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 2px,
+      rgba(0, 0, 0, 0.02) 2px,
+      rgba(0, 0, 0, 0.02) 3px
+    );
+}
+
+/* ============================================
+   ANIMACIONES
+   ============================================ */
+
+@keyframes rainFall {
+  0% { transform: translateY(-10%); }
+  100% { transform: translateY(110vh); }
+}
+
+@keyframes snowFall {
+  0% { 
+    transform: translateY(-5%) translateX(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(50vh) translateX(20px) rotate(180deg);
+  }
+  100% { 
+    transform: translateY(105vh) translateX(-10px) rotate(360deg);
+  }
+}
+
+@keyframes gentleSway {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(2deg); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+/* ============================================
+   REFLEJO DEL CRISTAL
+   ============================================ */
+
+.glass-reflection {
+  background: linear-gradient(
+    125deg,
+    rgba(255, 255, 255, 0.12) 0%,
+    transparent 35%,
+    transparent 65%,
+    rgba(255, 255, 255, 0.06) 100%
+  );
+  pointer-events: none;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .window-frame {
+    width: 90vw;
+    height: 60vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .window-frame {
+    width: 95vw;
+    height: 50vh;
+  }
+}
