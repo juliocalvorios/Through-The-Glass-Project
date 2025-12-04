@@ -34,17 +34,24 @@ function NordicWindowComponent({ children, timeOfDay, condition }: NordicWindowP
     return () => window.removeEventListener('mousemove', handleMouseMove)
   }, [mouseX, mouseY])
 
-  // Paleta de colores según hora
+  // Paleta de colores SCANDINAVIAN WINTER CABIN - Madera roja noruega
   const colors = {
     frame: {
-      outer: isNight ? '#1a1612' : '#8B7355',
-      middle: isNight ? '#2a2420' : '#A0896C',
-      inner: isNight ? '#3d342c' : '#C4A882',
-      accent: isNight ? '#4a3f35' : '#D4BC98',
-      highlight: isNight ? '#5a4d42' : '#E8D4B8',
+      // Madera roja escandinava (pino rojo, cerezo nórdico)
+      outer: isNight ? '#1a0f0f' : '#6B2D2D',      // Rojo oscuro profundo
+      middle: isNight ? '#2a1515' : '#8B3A3A',     // Rojo caoba
+      inner: isNight ? '#3d2020' : '#A04545',      // Rojo cerezo
+      accent: isNight ? '#4a2828' : '#B85555',     // Rojo cálido
+      highlight: isNight ? '#5a3535' : '#C96666',  // Rojo claro
+      deep: isNight ? '#120a0a' : '#4A1E1E',       // Rojo muy oscuro (sombras)
     },
     glass: {
       tint: isNight ? 'rgba(10, 15, 30, 0.3)' : 'rgba(200, 220, 255, 0.1)',
+    },
+    curtain: {
+      base: isNight ? '#2a2525' : '#E8DDD5',       // Lino natural
+      shadow: isNight ? '#1a1515' : '#D0C4BC',
+      highlight: isNight ? '#3a3232' : '#F5EDE5',
     }
   }
 
@@ -205,46 +212,103 @@ function NordicWindowComponent({ children, timeOfDay, condition }: NordicWindowP
 // TEXTURA DE MADERA
 // ============================================
 function WoodGrainTexture({ isNight }: { isNight: boolean }) {
+  // Colores de vetas para madera roja
+  const grainColor = isNight ? '#0a0505' : '#3d1515'
+  const grainColorLight = isNight ? '#1a0a0a' : '#5a2020'
+  const knotColor = isNight ? '#080404' : '#2a0f0f'
+
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-lg">
-      {/* Vetas principales */}
-      <svg className="absolute inset-0 w-full h-full opacity-20" preserveAspectRatio="none">
+      {/* Vetas principales - patrón de madera roja */}
+      <svg className="absolute inset-0 w-full h-full opacity-25" preserveAspectRatio="none">
         <defs>
-          <pattern id="woodGrain" patternUnits="userSpaceOnUse" width="200" height="8">
+          <pattern id="woodGrainRed" patternUnits="userSpaceOnUse" width="150" height="12">
+            {/* Veta principal ondulada */}
             <path
-              d="M0,4 Q50,2 100,4 T200,4"
-              stroke={isNight ? '#000' : '#5a3d2b'}
+              d="M0,3 Q30,1 60,3 Q90,5 120,3 T150,3"
+              stroke={grainColor}
+              strokeWidth="0.8"
+              fill="none"
+              opacity="0.6"
+            />
+            {/* Veta secundaria */}
+            <path
+              d="M0,7 Q40,5 80,7 Q110,9 150,7"
+              stroke={grainColor}
               strokeWidth="0.5"
               fill="none"
-              opacity="0.5"
+              opacity="0.4"
             />
+            {/* Veta fina */}
             <path
-              d="M0,6 Q50,8 100,6 T200,6"
-              stroke={isNight ? '#000' : '#5a3d2b'}
+              d="M0,10 Q25,9 50,10 Q75,11 100,10 T150,10"
+              stroke={grainColorLight}
               strokeWidth="0.3"
               fill="none"
               opacity="0.3"
             />
           </pattern>
+          {/* Gradiente para dar profundidad a la madera */}
+          <linearGradient id="woodDepth" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="white" stopOpacity="0.05" />
+            <stop offset="50%" stopColor="black" stopOpacity="0" />
+            <stop offset="100%" stopColor="black" stopOpacity="0.1" />
+          </linearGradient>
         </defs>
-        <rect width="100%" height="100%" fill="url(#woodGrain)" />
+        <rect width="100%" height="100%" fill="url(#woodGrainRed)" />
+        <rect width="100%" height="100%" fill="url(#woodDepth)" />
       </svg>
 
-      {/* Nudos de madera ocasionales */}
+      {/* Nudos de madera - característicos de pino rojo */}
       <div
-        className="absolute w-6 h-4 rounded-full opacity-10"
+        className="absolute rounded-full"
         style={{
-          top: '20%',
-          left: '15%',
-          background: `radial-gradient(ellipse, ${isNight ? '#000' : '#4a2c17'} 0%, transparent 70%)`,
+          width: '18px',
+          height: '12px',
+          top: '18%',
+          left: '12%',
+          background: `radial-gradient(ellipse, ${knotColor} 0%, ${knotColor}80 40%, transparent 70%)`,
+          opacity: 0.3,
+          transform: 'rotate(-5deg)',
         }}
       />
       <div
-        className="absolute w-4 h-3 rounded-full opacity-10"
+        className="absolute rounded-full"
         style={{
-          bottom: '30%',
-          right: '20%',
-          background: `radial-gradient(ellipse, ${isNight ? '#000' : '#4a2c17'} 0%, transparent 70%)`,
+          width: '14px',
+          height: '10px',
+          bottom: '25%',
+          right: '18%',
+          background: `radial-gradient(ellipse, ${knotColor} 0%, ${knotColor}80 40%, transparent 70%)`,
+          opacity: 0.25,
+          transform: 'rotate(8deg)',
+        }}
+      />
+      <div
+        className="absolute rounded-full"
+        style={{
+          width: '10px',
+          height: '8px',
+          top: '60%',
+          left: '75%',
+          background: `radial-gradient(ellipse, ${knotColor} 0%, ${knotColor}60 50%, transparent 70%)`,
+          opacity: 0.2,
+        }}
+      />
+
+      {/* Variación de tono en la madera (anillos de crecimiento) */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: `repeating-linear-gradient(
+            92deg,
+            transparent 0px,
+            transparent 40px,
+            ${isNight ? 'rgba(255,200,200,0.02)' : 'rgba(80,20,20,0.03)'} 40px,
+            ${isNight ? 'rgba(255,200,200,0.02)' : 'rgba(80,20,20,0.03)'} 42px,
+            transparent 42px,
+            transparent 80px
+          )`,
         }}
       />
     </div>
@@ -517,10 +581,10 @@ function WindowMuntins({ colors, isNight }: { colors: any; isNight: boolean }) {
 function Curtains({ isNight, condition }: { isNight: boolean; condition: WeatherCondition }) {
   const hasWind = condition === 'storm'
 
-  // Colores de las cortinas
-  const curtainBase = isNight ? '#3a3632' : '#E8E0D4'
-  const curtainShadow = isNight ? '#252320' : '#C8C0B4'
-  const curtainHighlight = isNight ? '#4a4540' : '#F5EDE1'
+  // Colores de las cortinas - Lino nórdico natural (contrasta con madera roja)
+  const curtainBase = isNight ? '#2a2525' : '#E8DDD5'
+  const curtainShadow = isNight ? '#1a1515' : '#D0C4BC'
+  const curtainHighlight = isNight ? '#3a3232' : '#F5EDE5'
 
   // Número de pliegues
   const foldCount = 5
@@ -686,47 +750,47 @@ function Curtains({ isNight, condition }: { isNight: boolean; condition: Weather
         />
       </motion.div>
 
-      {/* BARRA DE CORTINA */}
+      {/* BARRA DE CORTINA - Madera roja */}
       <div
         className="absolute -top-3 -left-4 -right-4 h-4 z-50"
         style={{
           background: `linear-gradient(
             180deg,
-            ${isNight ? '#5a4d42' : '#C9B896'} 0%,
-            ${isNight ? '#4a3f32' : '#A89880'} 50%,
-            ${isNight ? '#3d3529' : '#8B7355'} 100%
+            ${isNight ? '#4a2828' : '#B85555'} 0%,
+            ${isNight ? '#3d2020' : '#A04545'} 50%,
+            ${isNight ? '#2a1515' : '#8B3A3A'} 100%
           )`,
           borderRadius: '3px',
           boxShadow: `
             0 3px 8px rgba(0,0,0,0.3),
-            inset 0 1px 0 rgba(255,255,255,${isNight ? 0.1 : 0.3})
+            inset 0 1px 0 rgba(255,255,255,${isNight ? 0.1 : 0.2})
           `,
         }}
       >
-        {/* Terminales de la barra */}
+        {/* Terminales de la barra - latón/bronce */}
         <div
           className="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-5 rounded-full"
           style={{
-            background: `radial-gradient(circle at 30% 30%, ${isNight ? '#6a5d52' : '#D4C4A8'}, ${isNight ? '#4a3f32' : '#A89880'})`,
+            background: `radial-gradient(circle at 30% 30%, ${isNight ? '#8B7355' : '#D4AF37'}, ${isNight ? '#5a4a3a' : '#AA8C2C'})`,
             boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
           }}
         />
         <div
           className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-5 rounded-full"
           style={{
-            background: `radial-gradient(circle at 30% 30%, ${isNight ? '#6a5d52' : '#D4C4A8'}, ${isNight ? '#4a3f32' : '#A89880'})`,
+            background: `radial-gradient(circle at 30% 30%, ${isNight ? '#8B7355' : '#D4AF37'}, ${isNight ? '#5a4a3a' : '#AA8C2C'})`,
             boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
           }}
         />
 
-        {/* Anillas de cortina */}
+        {/* Anillas de cortina - latón */}
         {[15, 25, 75, 85].map((pos, i) => (
           <div
             key={i}
             className="absolute top-1/2 -translate-y-1/2 w-2.5 h-3 rounded-full border-2"
             style={{
               left: `${pos}%`,
-              borderColor: isNight ? '#6a5d52' : '#B8A882',
+              borderColor: isNight ? '#8B7355' : '#C9A876',
               background: 'transparent',
             }}
           />
@@ -818,13 +882,13 @@ function WindowsillDecor({ isNight, condition }: { isNight: boolean; condition: 
     >
       {/* VELA */}
       <div className="relative">
-        {/* Platito de la vela */}
+        {/* Platito de la vela - latón/bronce */}
         <div
           className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-8 h-2 rounded-full"
           style={{
             background: isNight
-              ? 'linear-gradient(180deg, #4a4540 0%, #3a3530 100%)'
-              : 'linear-gradient(180deg, #d4c4a8 0%, #c4b498 100%)',
+              ? 'linear-gradient(180deg, #6B5344 0%, #4a3a2a 100%)'
+              : 'linear-gradient(180deg, #CD7F32 0%, #AA6622 100%)',
             boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
           }}
         />
@@ -907,13 +971,13 @@ function WindowsillDecor({ isNight, condition }: { isNight: boolean; condition: 
 
       {/* PLANTA SUCULENTA */}
       <div className="relative">
-        {/* Maceta */}
+        {/* Maceta - cerámica escandinava (gris azulado) */}
         <div
           className="relative w-10 h-8"
           style={{
             background: isNight
-              ? 'linear-gradient(180deg, #6b5d4d 0%, #4a3f32 100%)'
-              : 'linear-gradient(180deg, #c9a876 0%, #a08060 100%)',
+              ? 'linear-gradient(180deg, #3a4550 0%, #2a3540 100%)'
+              : 'linear-gradient(180deg, #6B7B8A 0%, #5A6A7A 100%)',
             borderRadius: '2px 2px 4px 4px',
             clipPath: 'polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%)',
             boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
@@ -924,8 +988,8 @@ function WindowsillDecor({ isNight, condition }: { isNight: boolean; condition: 
             className="absolute -top-1 -left-0.5 -right-0.5 h-2 rounded-sm"
             style={{
               background: isNight
-                ? 'linear-gradient(180deg, #7a6d5d 0%, #5a4d3d 100%)'
-                : 'linear-gradient(180deg, #d4b896 0%, #b49876 100%)',
+                ? 'linear-gradient(180deg, #4a5560 0%, #3a4550 100%)'
+                : 'linear-gradient(180deg, #7B8B9A 0%, #6B7B8A 100%)',
             }}
           />
         </div>

@@ -27,189 +27,620 @@ function AnalogClockComponent({ weather, timeOfDay }: AnalogClockProps) {
   const minuteDeg = minutes * 6 + seconds * 0.1
   const hourDeg = hours * 30 + minutes * 0.5
 
+  // Colores SCANDINAVIAN WINTER CABIN - Madera roja noruega
+  const colors = {
+    wood: {
+      // Madera roja escandinava (igual que la ventana)
+      light: isNight ? '#3d2020' : '#A04545',
+      medium: isNight ? '#2a1515' : '#8B3A3A',
+      dark: isNight ? '#1a0f0f' : '#6B2D2D',
+      accent: isNight ? '#4a2828' : '#B85555',
+      highlight: isNight ? '#5a3535' : '#C96666',
+    },
+    metal: {
+      // Latón/bronce antiguo (contrasta con rojo)
+      gold: isNight ? '#8B7355' : '#D4AF37',
+      goldLight: isNight ? '#A08060' : '#F4CF67',
+      goldDark: isNight ? '#5a4a3a' : '#AA8C2C',
+      bronze: isNight ? '#6B5344' : '#CD7F32',
+    },
+    face: {
+      // Cara del reloj - crema cálido vintage
+      bg: isNight ? '#1a1815' : '#FDF8F0',
+      text: isNight ? '#C4A882' : '#4A2020',  // Texto más rojizo
+      accent: isNight ? '#8B5555' : '#6B2D2D', // Acento rojo oscuro
+    }
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.8, y: -20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.8, delay: 0.3 }}
-      className="flex flex-col items-center gap-4"
+      transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
+      className="flex flex-col items-center gap-5"
     >
-      {/* Reloj analógico */}
-      <div 
+      {/* ============================================
+          RELOJ PRINCIPAL
+          ============================================ */}
+      <div
         className="relative"
         style={{
-          width: '140px',
-          height: '140px',
+          width: '160px',
+          height: '160px',
         }}
       >
-        {/* Cuerpo del reloj - madera clara nórdica */}
-        <div 
+        {/* ============================================
+            SOMBRA EXTERIOR
+            ============================================ */}
+        <div
+          className="absolute -inset-2 rounded-full"
+          style={{
+            boxShadow: isNight
+              ? `
+                0 10px 40px rgba(0,0,0,0.6),
+                0 5px 15px rgba(0,0,0,0.4)
+              `
+              : `
+                0 10px 40px rgba(0,0,0,0.2),
+                0 5px 15px rgba(0,0,0,0.15)
+              `,
+          }}
+        />
+
+        {/* ============================================
+            CAPA 1: MARCO EXTERIOR DE MADERA
+            ============================================ */}
+        <div
           className="absolute inset-0 rounded-full"
           style={{
-            background: isNight 
-              ? 'linear-gradient(145deg, #3d3529 0%, #2a241c 100%)'
-              : 'linear-gradient(145deg, #f5ebe0 0%, #e8dcc8 100%)',
-            boxShadow: isNight
-              ? '0 8px 32px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.05)'
-              : '0 8px 32px rgba(0,0,0,0.15), inset 0 2px 4px rgba(255,255,255,0.5)',
-            border: isNight 
-              ? '6px solid #4a3f32'
-              : '6px solid #c9b896',
+            background: `
+              radial-gradient(
+                ellipse at 30% 20%,
+                ${colors.wood.accent} 0%,
+                ${colors.wood.light} 30%,
+                ${colors.wood.medium} 60%,
+                ${colors.wood.dark} 100%
+              )
+            `,
+            padding: '8px',
           }}
         >
-          {/* Textura de madera sutil */}
-          <div 
-            className="absolute inset-0 rounded-full opacity-20"
+          {/* Textura de madera roja en el marco */}
+          <svg className="absolute inset-0 w-full h-full rounded-full opacity-20 overflow-hidden">
+            <defs>
+              <pattern id="clockWoodGrainRed" patternUnits="userSpaceOnUse" width="50" height="6">
+                <path
+                  d="M0,2 Q12,1 25,2 T50,2"
+                  stroke={isNight ? '#0a0505' : '#3d1515'}
+                  strokeWidth="0.6"
+                  fill="none"
+                  opacity="0.7"
+                />
+                <path
+                  d="M0,4.5 Q15,4 30,4.5 T50,4.5"
+                  stroke={isNight ? '#0a0505' : '#3d1515'}
+                  strokeWidth="0.3"
+                  fill="none"
+                  opacity="0.4"
+                />
+              </pattern>
+            </defs>
+            <circle cx="50%" cy="50%" r="48%" fill="url(#clockWoodGrainRed)" />
+          </svg>
+
+          {/* Bisel superior (luz) */}
+          <div
+            className="absolute inset-0 rounded-full"
             style={{
-              backgroundImage: `repeating-linear-gradient(
-                90deg,
-                transparent 0px,
-                transparent 3px,
-                rgba(139,90,43,0.1) 3px,
-                rgba(139,90,43,0.1) 4px
+              background: `linear-gradient(
+                160deg,
+                rgba(255,255,255,${isNight ? 0.08 : 0.25}) 0%,
+                transparent 40%,
+                transparent 60%,
+                rgba(0,0,0,0.2) 100%
               )`,
             }}
           />
-        </div>
 
-        {/* Cara del reloj */}
-        <div className="absolute inset-3 rounded-full flex items-center justify-center">
-          
-          {/* Marcadores de hora */}
-          {[...Array(12)].map((_, i) => {
-            const angle = (i * 30 - 90) * (Math.PI / 180)
-            const isMainHour = i % 3 === 0
-            const radius = 42
-            const x = Math.cos(angle) * radius
-            const y = Math.sin(angle) * radius
-            
-            return (
+          {/* ============================================
+              CAPA 2: ARO METÁLICO DORADO/BRONCE
+              ============================================ */}
+          <div
+            className="relative w-full h-full rounded-full"
+            style={{
+              background: `
+                linear-gradient(
+                  145deg,
+                  ${colors.metal.goldLight} 0%,
+                  ${colors.metal.gold} 25%,
+                  ${colors.metal.goldDark} 50%,
+                  ${colors.metal.gold} 75%,
+                  ${colors.metal.goldLight} 100%
+                )
+              `,
+              padding: '4px',
+              boxShadow: `
+                inset 0 2px 4px rgba(255,255,255,${isNight ? 0.1 : 0.4}),
+                inset 0 -2px 4px rgba(0,0,0,0.3)
+              `,
+            }}
+          >
+            {/* Detalle del bisel metálico - muescas decorativas */}
+            <div className="absolute inset-1 rounded-full overflow-hidden">
+              {[...Array(60)].map((_, i) => {
+                const angle = (i * 6 - 90) * (Math.PI / 180)
+                const isHourMark = i % 5 === 0
+                if (!isHourMark) return null
+
+                return (
+                  <div
+                    key={i}
+                    className="absolute"
+                    style={{
+                      width: '2px',
+                      height: '6px',
+                      background: colors.metal.goldDark,
+                      left: '50%',
+                      top: '2px',
+                      transformOrigin: '50% 76px',
+                      transform: `translateX(-50%) rotate(${i * 6}deg)`,
+                    }}
+                  />
+                )
+              })}
+            </div>
+
+            {/* ============================================
+                CAPA 3: CARA DEL RELOJ
+                ============================================ */}
+            <div
+              className="relative w-full h-full rounded-full overflow-hidden"
+              style={{
+                background: `
+                  radial-gradient(
+                    circle at 40% 35%,
+                    ${isNight ? '#252220' : '#FFFEF8'} 0%,
+                    ${colors.face.bg} 50%,
+                    ${isNight ? '#151310' : '#F0E8D8'} 100%
+                  )
+                `,
+                boxShadow: `
+                  inset 0 3px 10px rgba(0,0,0,${isNight ? 0.5 : 0.15}),
+                  inset 0 -2px 6px rgba(255,255,255,${isNight ? 0.05 : 0.3})
+                `,
+              }}
+            >
+              {/* Textura sutil del papel/esmalte */}
               <div
-                key={i}
-                className="absolute"
+                className="absolute inset-0 rounded-full opacity-30"
                 style={{
-                  left: `calc(50% + ${x}px)`,
-                  top: `calc(50% + ${y}px)`,
-                  transform: 'translate(-50%, -50%)',
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+                  opacity: isNight ? 0.05 : 0.03,
+                }}
+              />
+
+              {/* ============================================
+                  NÚMEROS ROMANOS
+                  ============================================ */}
+              <ClockNumbers colors={colors} isNight={isNight} />
+
+              {/* ============================================
+                  MARCADORES DE MINUTOS
+                  ============================================ */}
+              <MinuteMarkers colors={colors} isNight={isNight} />
+
+              {/* ============================================
+                  MARCA/LOGO VINTAGE
+                  ============================================ */}
+              <div
+                className="absolute left-1/2 -translate-x-1/2"
+                style={{ top: '62%' }}
+              >
+                <span
+                  className="text-[6px] tracking-widest uppercase"
+                  style={{
+                    color: colors.face.accent,
+                    fontFamily: 'Georgia, serif',
+                    opacity: 0.6,
+                  }}
+                >
+                  Nordic
+                </span>
+              </div>
+
+              {/* ============================================
+                  AGUJAS
+                  ============================================ */}
+
+              {/* Sombra de las agujas */}
+              <div
+                className="absolute inset-0 rounded-full"
+                style={{
+                  filter: 'blur(2px)',
+                  opacity: 0.3,
                 }}
               >
-                {isMainHour ? (
-                  // Marcadores principales (12, 3, 6, 9)
-                  <div 
-                    className="w-2 h-2 rounded-full"
-                    style={{
-                      backgroundColor: isNight ? '#a89880' : '#8b7355',
-                    }}
-                  />
-                ) : (
-                  // Marcadores secundarios
-                  <div 
-                    className="w-1 h-1 rounded-full"
-                    style={{
-                      backgroundColor: isNight ? '#6b5d4d' : '#c9b896',
-                    }}
-                  />
-                )}
+                <HourHand angle={hourDeg} colors={colors} isShadow />
+                <MinuteHand angle={minuteDeg} colors={colors} isShadow />
               </div>
-            )
-          })}
 
-          {/* Aguja de hora */}
-          <motion.div
-            className="absolute origin-bottom"
+              {/* Aguja de hora */}
+              <HourHand angle={hourDeg} colors={colors} />
+
+              {/* Aguja de minuto */}
+              <MinuteHand angle={minuteDeg} colors={colors} />
+
+              {/* Aguja de segundo */}
+              <SecondHand angle={secondDeg} colors={colors} isNight={isNight} />
+
+              {/* Centro del reloj (eje de las agujas) */}
+              <div
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full z-30"
+                style={{
+                  width: '14px',
+                  height: '14px',
+                  background: `
+                    radial-gradient(
+                      circle at 35% 35%,
+                      ${colors.metal.goldLight} 0%,
+                      ${colors.metal.gold} 40%,
+                      ${colors.metal.goldDark} 100%
+                    )
+                  `,
+                  boxShadow: `
+                    0 2px 4px rgba(0,0,0,0.4),
+                    inset 0 1px 2px rgba(255,255,255,0.4)
+                  `,
+                }}
+              >
+                {/* Punto central */}
+                <div
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full"
+                  style={{
+                    background: colors.metal.goldDark,
+                    boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.5)',
+                  }}
+                />
+              </div>
+
+              {/* ============================================
+                  CRISTAL SOBRE LA CARA
+                  ============================================ */}
+              <div
+                className="absolute inset-0 rounded-full pointer-events-none"
+                style={{
+                  background: `
+                    linear-gradient(
+                      135deg,
+                      rgba(255,255,255,${isNight ? 0.03 : 0.12}) 0%,
+                      transparent 40%,
+                      transparent 60%,
+                      rgba(255,255,255,${isNight ? 0.01 : 0.05}) 100%
+                    )
+                  `,
+                }}
+              />
+
+              {/* Reflejo del cristal */}
+              <div
+                className="absolute rounded-full pointer-events-none"
+                style={{
+                  top: '8%',
+                  left: '15%',
+                  width: '35%',
+                  height: '25%',
+                  background: `
+                    radial-gradient(
+                      ellipse at 50% 50%,
+                      rgba(255,255,255,${isNight ? 0.04 : 0.15}) 0%,
+                      transparent 70%
+                    )
+                  `,
+                  transform: 'rotate(-20deg)',
+                }}
+              />
+
+              {/* Borde del cristal */}
+              <div
+                className="absolute inset-0 rounded-full pointer-events-none"
+                style={{
+                  boxShadow: `
+                    inset 0 1px 0 rgba(255,255,255,${isNight ? 0.1 : 0.3}),
+                    inset 0 -1px 0 rgba(0,0,0,0.1)
+                  `,
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* ============================================
+            GANCHO PARA COLGAR
+            ============================================ */}
+        <div
+          className="absolute left-1/2 -translate-x-1/2"
+          style={{ top: '-12px' }}
+        >
+          {/* Aro del gancho */}
+          <div
+            className="relative w-6 h-4"
             style={{
-              width: '4px',
-              height: '32px',
-              bottom: '50%',
-              left: 'calc(50% - 2px)',
-              backgroundColor: isNight ? '#d4c4a8' : '#5c4a32',
-              borderRadius: '2px',
-              transformOrigin: 'bottom center',
+              borderRadius: '50% 50% 0 0',
+              border: `3px solid ${colors.metal.gold}`,
+              borderBottom: 'none',
+              boxShadow: `
+                0 -2px 4px rgba(0,0,0,0.2),
+                inset 0 2px 2px rgba(255,255,255,${isNight ? 0.1 : 0.3})
+              `,
             }}
-            animate={{ rotate: hourDeg }}
-            transition={{ type: 'spring', stiffness: 100, damping: 20 }}
           />
-
-          {/* Aguja de minuto */}
-          <motion.div
-            className="absolute origin-bottom"
+          {/* Base del gancho */}
+          <div
+            className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-2 rounded-b-full"
             style={{
-              width: '3px',
-              height: '44px',
-              bottom: '50%',
-              left: 'calc(50% - 1.5px)',
-              backgroundColor: isNight ? '#c9b896' : '#6b5740',
-              borderRadius: '1.5px',
-              transformOrigin: 'bottom center',
-            }}
-            animate={{ rotate: minuteDeg }}
-            transition={{ type: 'spring', stiffness: 100, damping: 20 }}
-          />
-
-          {/* Aguja de segundo */}
-          <motion.div
-            className="absolute origin-bottom"
-            style={{
-              width: '1px',
-              height: '48px',
-              bottom: '50%',
-              left: 'calc(50% - 0.5px)',
-              backgroundColor: isNight ? '#a08060' : '#8b5a2b',
-              transformOrigin: 'bottom center',
-            }}
-            animate={{ rotate: secondDeg }}
-            transition={{ duration: 0.1 }}
-          />
-
-          {/* Centro del reloj */}
-          <div 
-            className="absolute w-3 h-3 rounded-full"
-            style={{
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              backgroundColor: isNight ? '#a89880' : '#8b7355',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+              background: `linear-gradient(180deg, ${colors.wood.light} 0%, ${colors.wood.medium} 100%)`,
+              boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
             }}
           />
         </div>
-
-        {/* Pequeño gancho arriba (para colgar) */}
-        <div 
-          className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-3 rounded-t-full"
-          style={{
-            backgroundColor: isNight ? '#4a3f32' : '#c9b896',
-          }}
-        />
       </div>
 
-      {/* Temperatura debajo del reloj */}
+      {/* ============================================
+          TEMPERATURA Y UBICACIÓN
+          ============================================ */}
       {weather && (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.6 }}
           className="text-center"
         >
-          <div 
+          {/* Temperatura */}
+          <div
             className="text-3xl font-light tracking-wide"
             style={{
-              color: isNight ? '#e8dcc8' : '#5c4a32',
+              color: colors.face.text,
               fontFamily: 'Georgia, serif',
+              textShadow: isNight ? '0 0 10px rgba(196,168,130,0.3)' : 'none',
             }}
           >
             {weather.temperature}°
           </div>
-          <div 
-            className="text-xs uppercase tracking-widest mt-1"
-            style={{
-              color: isNight ? '#a89880' : '#8b7355',
-            }}
-          >
-            {weather.location?.city}
-          </div>
+
+          {/* Ubicación */}
+          {weather.location?.city && (
+            <div
+              className="text-[10px] uppercase tracking-[0.2em] mt-1"
+              style={{
+                color: colors.face.accent,
+                opacity: 0.7,
+              }}
+            >
+              {weather.location.city}
+            </div>
+          )}
         </motion.div>
       )}
+    </motion.div>
+  )
+}
+
+// ============================================
+// NÚMEROS ROMANOS
+// ============================================
+function ClockNumbers({ colors, isNight }: { colors: any; isNight: boolean }) {
+  const numbers = [
+    { num: 'XII', angle: 0 },
+    { num: 'I', angle: 30 },
+    { num: 'II', angle: 60 },
+    { num: 'III', angle: 90 },
+    { num: 'IV', angle: 120 },
+    { num: 'V', angle: 150 },
+    { num: 'VI', angle: 180 },
+    { num: 'VII', angle: 210 },
+    { num: 'VIII', angle: 240 },
+    { num: 'IX', angle: 270 },
+    { num: 'X', angle: 300 },
+    { num: 'XI', angle: 330 },
+  ]
+
+  const radius = 48 // Distancia desde el centro
+
+  return (
+    <>
+      {numbers.map(({ num, angle }) => {
+        const angleRad = (angle - 90) * (Math.PI / 180)
+        const x = Math.cos(angleRad) * radius
+        const y = Math.sin(angleRad) * radius
+
+        return (
+          <div
+            key={num}
+            className="absolute"
+            style={{
+              left: `calc(50% + ${x}px)`,
+              top: `calc(50% + ${y}px)`,
+              transform: 'translate(-50%, -50%)',
+            }}
+          >
+            <span
+              style={{
+                fontSize: num === 'XII' || num === 'VI' ? '11px' : '9px',
+                fontFamily: 'Georgia, "Times New Roman", serif',
+                fontWeight: num === 'XII' ? 600 : 400,
+                color: colors.face.text,
+                textShadow: isNight ? '0 0 8px rgba(196,168,130,0.2)' : 'none',
+              }}
+            >
+              {num}
+            </span>
+          </div>
+        )
+      })}
+    </>
+  )
+}
+
+// ============================================
+// MARCADORES DE MINUTOS
+// ============================================
+function MinuteMarkers({ colors, isNight }: { colors: any; isNight: boolean }) {
+  return (
+    <>
+      {[...Array(60)].map((_, i) => {
+        const isHourMark = i % 5 === 0
+        if (isHourMark) return null // Los de hora ya tienen números
+
+        const angle = (i * 6 - 90) * (Math.PI / 180)
+        const outerRadius = 58
+        const innerRadius = 54
+        const x1 = Math.cos(angle) * outerRadius
+        const y1 = Math.sin(angle) * outerRadius
+        const x2 = Math.cos(angle) * innerRadius
+        const y2 = Math.sin(angle) * innerRadius
+
+        return (
+          <div
+            key={i}
+            className="absolute"
+            style={{
+              left: '50%',
+              top: '50%',
+              width: '1px',
+              height: '4px',
+              background: colors.face.accent,
+              opacity: 0.3,
+              transformOrigin: 'center -54px',
+              transform: `translate(-50%, -58px) rotate(${i * 6}deg)`,
+            }}
+          />
+        )
+      })}
+    </>
+  )
+}
+
+// ============================================
+// AGUJA DE HORA (estilo spade/flecha)
+// ============================================
+function HourHand({ angle, colors, isShadow = false }: { angle: number; colors: any; isShadow?: boolean }) {
+  return (
+    <motion.div
+      className="absolute z-20"
+      style={{
+        left: '50%',
+        top: '50%',
+        width: '8px',
+        height: '38px',
+        transformOrigin: 'center bottom',
+        transform: isShadow ? `translate(-50%, -100%) translate(2px, 2px)` : 'translate(-50%, -100%)',
+      }}
+      animate={{ rotate: angle }}
+      transition={{ type: 'spring', stiffness: 80, damping: 15 }}
+    >
+      {/* Forma de flecha/spade */}
+      <svg
+        width="8"
+        height="38"
+        viewBox="0 0 8 38"
+        fill="none"
+        style={{ filter: isShadow ? 'blur(1px)' : 'none' }}
+      >
+        <path
+          d="M4 0 L7 10 L5.5 10 L5.5 38 L2.5 38 L2.5 10 L1 10 Z"
+          fill={isShadow ? 'rgba(0,0,0,0.4)' : colors.face.text}
+        />
+        {!isShadow && (
+          <path
+            d="M4 1 L6 9 L5 9 L5 37 L4 37 L4 9 L3 9 Z"
+            fill={colors.metal.gold}
+            opacity="0.3"
+          />
+        )}
+      </svg>
+    </motion.div>
+  )
+}
+
+// ============================================
+// AGUJA DE MINUTO (más larga y elegante)
+// ============================================
+function MinuteHand({ angle, colors, isShadow = false }: { angle: number; colors: any; isShadow?: boolean }) {
+  return (
+    <motion.div
+      className="absolute z-21"
+      style={{
+        left: '50%',
+        top: '50%',
+        width: '6px',
+        height: '52px',
+        transformOrigin: 'center bottom',
+        transform: isShadow ? `translate(-50%, -100%) translate(2px, 2px)` : 'translate(-50%, -100%)',
+      }}
+      animate={{ rotate: angle }}
+      transition={{ type: 'spring', stiffness: 80, damping: 15 }}
+    >
+      <svg
+        width="6"
+        height="52"
+        viewBox="0 0 6 52"
+        fill="none"
+        style={{ filter: isShadow ? 'blur(1px)' : 'none' }}
+      >
+        <path
+          d="M3 0 L5.5 8 L4 8 L4 52 L2 52 L2 8 L0.5 8 Z"
+          fill={isShadow ? 'rgba(0,0,0,0.4)' : colors.face.text}
+        />
+        {!isShadow && (
+          <path
+            d="M3 1 L5 7.5 L3.5 7.5 L3.5 51 L3 51 L3 7.5 L2 7.5 Z"
+            fill={colors.metal.gold}
+            opacity="0.25"
+          />
+        )}
+      </svg>
+    </motion.div>
+  )
+}
+
+// ============================================
+// AGUJA DE SEGUNDO (roja, delgada, clásica)
+// ============================================
+function SecondHand({ angle, colors, isNight }: { angle: number; colors: any; isNight: boolean }) {
+  return (
+    <motion.div
+      className="absolute z-22"
+      style={{
+        left: '50%',
+        top: '50%',
+        transformOrigin: 'center 8px',
+        transform: 'translate(-50%, -56px)',
+      }}
+      animate={{ rotate: angle }}
+      transition={{ duration: 0.1, ease: 'linear' }}
+    >
+      <svg width="3" height="64" viewBox="0 0 3 64" fill="none">
+        {/* Cola de contrapeso */}
+        <circle
+          cx="1.5"
+          cy="60"
+          r="2.5"
+          fill={isNight ? '#8B4513' : '#B22222'}
+        />
+        {/* Cuerpo de la aguja */}
+        <rect
+          x="1"
+          y="0"
+          width="1"
+          height="60"
+          fill={isNight ? '#8B4513' : '#B22222'}
+        />
+        {/* Punta */}
+        <path
+          d="M1.5 0 L2.5 4 L0.5 4 Z"
+          fill={isNight ? '#8B4513' : '#B22222'}
+        />
+      </svg>
     </motion.div>
   )
 }
