@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useId } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   AnalogClock,
@@ -644,6 +644,7 @@ function WallSwitch({
   onCurtainsToggle: () => void
   isLightOverride: boolean
 }) {
+  const id = useId()
   const colors = {
     plate: isNight ? '#2a1818' : '#6B3A3A',
     plateLight: isNight ? '#3a2222' : '#7A4545',
@@ -843,7 +844,7 @@ function WallSwitch({
         {/* Textura de madera */}
         <svg className="absolute inset-0 w-full h-full pointer-events-none rounded-lg overflow-hidden" style={{ opacity: 0.1 }}>
           <defs>
-            <pattern id="switchWoodGrain" patternUnits="userSpaceOnUse" width="40" height="6">
+            <pattern id={`${id}-switchWoodGrain`} patternUnits="userSpaceOnUse" width="40" height="6">
               <path
                 d="M0,3 Q10,1 20,3 T40,3"
                 stroke={isNight ? '#4a2828' : '#3A2020'}
@@ -852,7 +853,7 @@ function WallSwitch({
               />
             </pattern>
           </defs>
-          <rect width="100%" height="100%" fill="url(#switchWoodGrain)" />
+          <rect width="100%" height="100%" fill={`url(#${id}-switchWoodGrain)`} />
         </svg>
       </div>
     </motion.div>
