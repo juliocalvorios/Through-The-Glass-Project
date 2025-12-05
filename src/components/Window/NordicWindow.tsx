@@ -1,7 +1,7 @@
 'use client'
 
-import { memo, ReactNode, useRef, useEffect } from 'react'
-import { motion, useMotionValue, useSpring, AnimatePresence } from 'framer-motion'
+import { memo, ReactNode } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { TimeOfDay, WeatherCondition } from '@/types'
 
 interface NordicWindowProps {
@@ -10,31 +10,11 @@ interface NordicWindowProps {
   condition: WeatherCondition
   curtainsOpen?: boolean
   onCurtainsToggle?: () => void
+  fireGlow?: boolean
 }
 
-function NordicWindowComponent({ children, timeOfDay, condition, curtainsOpen = true, onCurtainsToggle }: NordicWindowProps) {
+function NordicWindowComponent({ children, timeOfDay, condition, curtainsOpen = true, onCurtainsToggle, fireGlow = false }: NordicWindowProps) {
   const isNight = timeOfDay === 'night' || timeOfDay === 'dusk'
-  const windowRef = useRef<HTMLDivElement>(null)
-
-  // Para el reflejo que sigue al cursor
-  const mouseX = useMotionValue(0.5)
-  const mouseY = useMotionValue(0.5)
-  const springX = useSpring(mouseX, { stiffness: 50, damping: 20 })
-  const springY = useSpring(mouseY, { stiffness: 50, damping: 20 })
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!windowRef.current) return
-      const rect = windowRef.current.getBoundingClientRect()
-      const x = (e.clientX - rect.left) / rect.width
-      const y = (e.clientY - rect.top) / rect.height
-      mouseX.set(Math.max(0, Math.min(1, x)))
-      mouseY.set(Math.max(0, Math.min(1, y)))
-    }
-
-    window.addEventListener('mousemove', handleMouseMove)
-    return () => window.removeEventListener('mousemove', handleMouseMove)
-  }, [mouseX, mouseY])
 
   // Paleta de colores SCANDINAVIAN WINTER CABIN - Madera roja noruega
   const colors = {
@@ -59,7 +39,6 @@ function NordicWindowComponent({ children, timeOfDay, condition, curtainsOpen = 
 
   return (
     <motion.div
-      ref={windowRef}
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -182,8 +161,7 @@ function NordicWindowComponent({ children, timeOfDay, condition, curtainsOpen = 
               <GlassEffects
                 isNight={isNight}
                 condition={condition}
-                springX={springX}
-                springY={springY}
+                fireGlow={fireGlow}
               />
 
               {/* ============================================
@@ -323,114 +301,148 @@ function WoodGrainTexture({ isNight }: { isNight: boolean }) {
 }
 
 // ============================================
-// EFECTOS DEL CRISTAL
+// EFECTOS DEL CRISTAL - Realista y elegante
 // ============================================
 function GlassEffects({
   isNight,
   condition,
-  springX,
-  springY,
+  fireGlow = false,
 }: {
   isNight: boolean
   condition: WeatherCondition
-  springX: any
-  springY: any
+  fireGlow?: boolean
 }) {
   return (
     <>
-      {/* Tinte del cristal */}
+      {/* Tinte del cristal - muy sutil */}
       <div
         className="absolute inset-0 pointer-events-none z-20"
         style={{
           background: isNight
-            ? 'rgba(10, 15, 35, 0.15)'
-            : 'rgba(220, 235, 255, 0.08)',
-          mixBlendMode: 'multiply',
+            ? 'rgba(8, 12, 25, 0.08)'
+            : 'rgba(200, 220, 255, 0.04)',
         }}
       />
 
-      {/* Reflejo principal que sigue al cursor */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none z-30"
-        style={{
-          background: `radial-gradient(
-            ellipse 60% 50% at calc(${springX.get() * 100}% + 0%) calc(${springY.get() * 100}% + 0%),
-            rgba(255,255,255,${isNight ? 0.03 : 0.12}) 0%,
-            transparent 50%
-          )`,
-        }}
-      />
-
-      {/* Reflejo de esquina superior izquierda (luz de ventana) */}
-      <div
-        className="absolute top-0 left-0 w-1/2 h-1/2 pointer-events-none z-30"
-        style={{
-          background: `linear-gradient(
-            135deg,
-            rgba(255,255,255,${isNight ? 0.02 : 0.15}) 0%,
-            rgba(255,255,255,${isNight ? 0.01 : 0.05}) 30%,
-            transparent 60%
-          )`,
-        }}
-      />
-
-      {/* Reflejo lineal diagonal */}
+      {/* Reflejo principal - estático, esquina superior izquierda (fuente de luz natural) */}
       <div
         className="absolute inset-0 pointer-events-none z-30"
         style={{
-          background: `linear-gradient(
-            125deg,
-            transparent 0%,
-            transparent 40%,
-            rgba(255,255,255,${isNight ? 0.015 : 0.06}) 45%,
-            rgba(255,255,255,${isNight ? 0.02 : 0.08}) 50%,
-            rgba(255,255,255,${isNight ? 0.015 : 0.06}) 55%,
-            transparent 60%,
-            transparent 100%
-          )`,
-        }}
-      />
-
-      {/* Borde del cristal - bisel interior */}
-      <div
-        className="absolute inset-0 pointer-events-none z-25 rounded"
-        style={{
-          boxShadow: `
-            inset 0 1px 0 rgba(255,255,255,${isNight ? 0.05 : 0.2}),
-            inset 0 -1px 0 rgba(0,0,0,0.1),
-            inset 1px 0 0 rgba(255,255,255,${isNight ? 0.03 : 0.1}),
-            inset -1px 0 0 rgba(0,0,0,0.05)
+          background: `
+            radial-gradient(
+              ellipse 80% 60% at 15% 20%,
+              rgba(255,255,255,${isNight ? 0.02 : 0.06}) 0%,
+              rgba(255,255,255,${isNight ? 0.01 : 0.03}) 30%,
+              transparent 60%
+            )
           `,
         }}
       />
 
-      {/* Imperfecciones sutiles del cristal */}
+      {/* Reflejo secundario - esquina opuesta más tenue */}
       <div
-        className="absolute inset-0 pointer-events-none z-20 opacity-30"
+        className="absolute inset-0 pointer-events-none z-30"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-          opacity: 0.02,
+          background: `
+            radial-gradient(
+              ellipse 50% 40% at 85% 75%,
+              rgba(255,255,255,${isNight ? 0.008 : 0.025}) 0%,
+              transparent 50%
+            )
+          `,
         }}
       />
 
-      {/* Condensación según el clima */}
+      {/* Borde interior del cristal - bisel sutil */}
+      <div
+        className="absolute inset-0 pointer-events-none z-25 rounded"
+        style={{
+          boxShadow: `
+            inset 0 1px 0 rgba(255,255,255,${isNight ? 0.03 : 0.12}),
+            inset 0 -1px 0 rgba(0,0,0,0.08),
+            inset 1px 0 0 rgba(255,255,255,${isNight ? 0.02 : 0.06}),
+            inset -1px 0 0 rgba(0,0,0,0.04)
+          `,
+        }}
+      />
+
+      {/* Textura de cristal muy sutil - imperfecciones microscópicas */}
+      <div
+        className="absolute inset-0 pointer-events-none z-20"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+          opacity: 0.015,
+          mixBlendMode: 'overlay',
+        }}
+      />
+
+      {/* Condensación en lluvia/tormenta - gotas en el borde inferior */}
       {(condition === 'rain' || condition === 'storm') && (
-        <div
-          className="absolute inset-0 pointer-events-none z-35"
-          style={{
-            background: `linear-gradient(
-              180deg,
-              transparent 0%,
-              transparent 60%,
-              rgba(180, 200, 220, 0.08) 80%,
-              rgba(180, 200, 220, 0.12) 100%
-            )`,
-          }}
-        />
+        <div className="absolute inset-0 pointer-events-none z-35">
+          {/* Vaho en la parte inferior */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: '25%',
+              background: `linear-gradient(
+                180deg,
+                transparent 0%,
+                rgba(180, 200, 220, 0.04) 50%,
+                rgba(180, 200, 220, 0.08) 100%
+              )`,
+            }}
+          />
+          {/* Gotitas pequeñas de condensación */}
+          <svg className="absolute inset-0 w-full h-full" style={{ opacity: 0.4 }}>
+            <defs>
+              <radialGradient id="droplet" cx="50%" cy="30%" r="50%">
+                <stop offset="0%" stopColor="white" stopOpacity="0.6" />
+                <stop offset="100%" stopColor="white" stopOpacity="0" />
+              </radialGradient>
+            </defs>
+            {[...Array(12)].map((_, i) => (
+              <circle
+                key={i}
+                cx={`${15 + (i % 4) * 25 + Math.random() * 10}%`}
+                cy={`${75 + Math.random() * 20}%`}
+                r={1 + Math.random() * 1.5}
+                fill="url(#droplet)"
+              />
+            ))}
+          </svg>
+        </div>
       )}
 
       {/* Escarcha en las esquinas (nieve/frío) */}
       {condition === 'snow' && <FrostEffect />}
+
+      {/* Reflejo del fuego de la chimenea (solo de noche) */}
+      {fireGlow && isNight && (
+        <>
+          <motion.div
+            className="absolute pointer-events-none z-25"
+            style={{
+              bottom: '5%',
+              right: '5%',
+              width: '35%',
+              height: '30%',
+              background: 'radial-gradient(ellipse at 100% 100%, rgba(255,120,50,0.06) 0%, rgba(255,80,30,0.03) 40%, transparent 70%)',
+              filter: 'blur(10px)',
+            }}
+            animate={{
+              opacity: [0.5, 0.8, 0.6, 0.75, 0.5],
+            }}
+            transition={{
+              duration: 2.5,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          />
+        </>
+      )}
     </>
   )
 }
@@ -616,7 +628,7 @@ function Curtains({
         className="absolute left-0 top-0 bottom-0 z-40 cursor-pointer overflow-hidden"
         style={{
           marginTop: '-1%',
-          marginBottom: '8%',
+          marginBottom: '-2%',
         }}
         initial={false}
         animate={{
@@ -707,7 +719,7 @@ function Curtains({
         className="absolute right-0 top-0 bottom-0 z-40 cursor-pointer overflow-hidden"
         style={{
           marginTop: '-1%',
-          marginBottom: '8%',
+          marginBottom: '-2%',
         }}
         initial={false}
         animate={{
@@ -920,178 +932,6 @@ function WindowsillDecor({ isNight, condition }: { isNight: boolean; condition: 
       className="absolute -top-6 left-0 right-0 flex items-end justify-between px-8"
       style={{ transform: 'rotateX(-10deg)', transformOrigin: 'top center' }}
     >
-      {/* VELA */}
-      <div className="relative">
-        {/* Platito de la vela - latón/bronce */}
-        <div
-          className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-8 h-2 rounded-full"
-          style={{
-            background: isNight
-              ? 'linear-gradient(180deg, #6B5344 0%, #4a3a2a 100%)'
-              : 'linear-gradient(180deg, #CD7F32 0%, #AA6622 100%)',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-          }}
-        />
-
-        {/* Cuerpo de la vela */}
-        <div
-          className="relative w-5 h-10 rounded-sm mx-auto"
-          style={{
-            background: isNight
-              ? 'linear-gradient(180deg, #f5f0e6 0%, #e8e0d4 50%, #ddd5c8 100%)'
-              : 'linear-gradient(180deg, #fffef8 0%, #f5f0e6 50%, #ebe3d6 100%)',
-            boxShadow: isNight
-              ? '0 0 20px rgba(255,180,100,0.3), inset -2px 0 4px rgba(0,0,0,0.1)'
-              : 'inset -2px 0 4px rgba(0,0,0,0.1)',
-          }}
-        >
-          {/* Cera derretida */}
-          <div
-            className="absolute top-0 left-0 right-0 h-3"
-            style={{
-              background: 'linear-gradient(180deg, rgba(0,0,0,0.05) 0%, transparent 100%)',
-              borderRadius: '2px 2px 0 0',
-            }}
-          />
-        </div>
-
-        {/* Mecha */}
-        <div
-          className="absolute -top-2 left-1/2 -translate-x-1/2 w-0.5 h-3"
-          style={{
-            backgroundColor: '#2a2420',
-            borderRadius: '1px',
-          }}
-        />
-
-        {/* Llama (solo de noche) */}
-        {isNight && (
-          <motion.div
-            className="absolute -top-8 left-1/2 -translate-x-1/2"
-            animate={{
-              scale: [1, 1.05, 0.95, 1.02, 1],
-              rotate: [-1, 1, -0.5, 0.5, 0],
-            }}
-            transition={{ duration: 0.4, repeat: Infinity }}
-          >
-            {/* Llama exterior */}
-            <div
-              className="w-4 h-7 rounded-full"
-              style={{
-                background: `radial-gradient(
-                  ellipse 50% 80% at 50% 90%,
-                  #fff 0%,
-                  #ffdd44 20%,
-                  #ff9500 50%,
-                  #ff5500 70%,
-                  transparent 100%
-                )`,
-                filter: 'blur(0.5px)',
-              }}
-            />
-            {/* Núcleo de la llama */}
-            <div
-              className="absolute bottom-1 left-1/2 -translate-x-1/2 w-2 h-4 rounded-full"
-              style={{
-                background: 'linear-gradient(0deg, #4af 0%, #fff 50%, transparent 100%)',
-                filter: 'blur(0.5px)',
-              }}
-            />
-            {/* Glow */}
-            <div
-              className="absolute -inset-4"
-              style={{
-                background: 'radial-gradient(circle, rgba(255,180,80,0.4) 0%, transparent 70%)',
-                filter: 'blur(8px)',
-              }}
-            />
-          </motion.div>
-        )}
-      </div>
-
-      {/* PLANTA SUCULENTA */}
-      <div className="relative">
-        {/* Maceta - cerámica escandinava (gris azulado) */}
-        <div
-          className="relative w-10 h-8"
-          style={{
-            background: isNight
-              ? 'linear-gradient(180deg, #3a4550 0%, #2a3540 100%)'
-              : 'linear-gradient(180deg, #6B7B8A 0%, #5A6A7A 100%)',
-            borderRadius: '2px 2px 4px 4px',
-            clipPath: 'polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%)',
-            boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-          }}
-        >
-          {/* Borde de la maceta */}
-          <div
-            className="absolute -top-1 -left-0.5 -right-0.5 h-2 rounded-sm"
-            style={{
-              background: isNight
-                ? 'linear-gradient(180deg, #4a5560 0%, #3a4550 100%)'
-                : 'linear-gradient(180deg, #7B8B9A 0%, #6B7B8A 100%)',
-            }}
-          />
-        </div>
-
-        {/* Tierra */}
-        <div
-          className="absolute top-0 left-1 right-1 h-2 rounded-t-sm"
-          style={{
-            backgroundColor: '#3d2817',
-            boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.3)',
-          }}
-        />
-
-        {/* Hojas de la suculenta */}
-        <div className="absolute -top-6 left-1/2 -translate-x-1/2">
-          {[
-            { angle: -40, height: 14, delay: 0 },
-            { angle: -20, height: 16, delay: 0.1 },
-            { angle: 0, height: 18, delay: 0.2 },
-            { angle: 20, height: 16, delay: 0.1 },
-            { angle: 40, height: 14, delay: 0 },
-          ].map((leaf, i) => (
-            <motion.div
-              key={i}
-              className="absolute bottom-0 left-1/2 origin-bottom"
-              style={{
-                width: '6px',
-                height: leaf.height,
-                background: `linear-gradient(
-                  0deg,
-                  ${isNight ? '#3a5030' : '#5c6b54'} 0%,
-                  ${isNight ? '#4a6040' : '#6b7a64'} 50%,
-                  ${isNight ? '#5a7050' : '#7a8a74'} 100%
-                )`,
-                borderRadius: '50% 50% 20% 20%',
-                transform: `translateX(-50%) rotate(${leaf.angle}deg)`,
-                boxShadow: 'inset 1px 0 2px rgba(255,255,255,0.2)',
-              }}
-              animate={{
-                rotate: [leaf.angle, leaf.angle + 2, leaf.angle],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                delay: leaf.delay,
-                ease: 'easeInOut',
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Nieve en la planta */}
-        {condition === 'snow' && (
-          <div
-            className="absolute -top-7 left-1/2 -translate-x-1/2 w-6 h-3"
-            style={{
-              background: 'radial-gradient(ellipse at bottom, white 0%, transparent 80%)',
-              filter: 'blur(1px)',
-            }}
-          />
-        )}
-      </div>
     </div>
   )
 }
