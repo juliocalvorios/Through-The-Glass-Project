@@ -286,22 +286,27 @@ export default function Home() {
         <SoundIcon enabled={soundEnabled} isNight={isNight} />
       </motion.button>
 
-      {/* Crédito discreto */}
+      {/* Crédito discreto - esquina inferior derecha */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2 }}
-        className="absolute bottom-4 right-1/2 translate-x-1/2 z-30"
+        className="absolute bottom-4 right-6 z-30 group cursor-default"
       >
         <span
-          className="text-xs tracking-wider"
+          className="relative text-xs tracking-wider"
           style={{
-            color: isNight ? 'rgba(255,220,180,0.4)' : 'rgba(60,30,20,0.4)',
+            color: isNight ? 'rgba(212,165,116,0.7)' : 'rgba(201,168,108,0.8)',
             fontFamily: 'Georgia, serif',
-            textShadow: isNight ? '0 1px 2px rgba(0,0,0,0.5)' : 'none',
+            textShadow: isNight ? '0 1px 3px rgba(0,0,0,0.8)' : '0 1px 2px rgba(0,0,0,0.3)',
           }}
         >
-          Through the Glass
+          <span className="transition-opacity duration-500 group-hover:opacity-0">
+            Through the Glass
+          </span>
+          <span className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+            by Julio Calvo
+          </span>
         </span>
       </motion.div>
 
