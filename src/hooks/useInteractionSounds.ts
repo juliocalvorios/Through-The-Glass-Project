@@ -12,23 +12,18 @@ interface SoundConfig {
 }
 
 const INTERACTION_SOUNDS = {
-  // Curtains - the file has both open and close sounds
-  // Open sound: first ~4 seconds, Close sound: ~4-8 seconds
+  // Curtains - separate files for open and close
   curtainOpen: {
-    src: '/sounds/curtains-opening-or-closing-2-93377.mp3',
+    src: '/sounds/curtains-open.mp3',
     volume: 0.5,
-    startTime: 0,
-    endTime: 4.5,
   },
   curtainClose: {
-    src: '/sounds/curtains-opening-or-closing-2-93377.mp3',
+    src: '/sounds/curtains-close.mp3',
     volume: 0.5,
-    startTime: 4.5,
-    endTime: 9,
   },
-  // Lamp pull cord
+  // Lamp
   lamp: {
-    src: '/sounds/lamp-string-on-off-38279.mp3',
+    src: '/sounds/lamp-string.mp3',
     volume: 0.6,
   },
   // Wall light switch
@@ -42,12 +37,17 @@ const INTERACTION_SOUNDS = {
     volume: 0.15,
     loop: true,
   },
-  // Book drop (just first 2 seconds)
+  // Book sound (skip first 0.6s)
   bookDrop: {
-    src: '/sounds/book-drop-30016.mp3',
+    src: '/sounds/book-sound.mp3',
     volume: 0.5,
-    startTime: 0,
-    endTime: 2,
+    startTime: 0.6,
+  },
+  // Weather switch whoosh (skip first 0.8s)
+  weatherSwitch: {
+    src: '/sounds/whoose-switch-effect.mp3',
+    volume: 0.5,
+    startTime: 0.8,
   },
 } as const
 

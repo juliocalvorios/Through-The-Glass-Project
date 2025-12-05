@@ -12,7 +12,7 @@ interface SoundConfig {
   fadeOut?: number
 }
 
-type SoundType = 'rain' | 'storm' | 'thunder' | 'wind' | 'snow' | 'fire' | 'birds' | 'crickets' | 'aurora'
+type SoundType = 'rain' | 'storm' | 'thunder' | 'wind' | 'snow' | 'fire' | 'birds' | 'crickets' | 'aurora' | 'piano'
 
 // You'll need to add actual sound files to public/sounds/
 const SOUND_CONFIGS: Record<SoundType, SoundConfig> = {
@@ -77,12 +77,19 @@ const SOUND_CONFIGS: Record<SoundType, SoundConfig> = {
     fadeIn: 4000,
     fadeOut: 4000,
   },
+  piano: {
+    src: '/sounds/piano-music.mp3',
+    volume: 0.08,
+    loop: true,
+    fadeIn: 3000,
+    fadeOut: 3000,
+  },
 }
 
 // Map weather conditions to sounds
 function getSoundsForWeather(condition: WeatherCondition, timeOfDay: TimeOfDay): SoundType[] {
   const isNight = timeOfDay === 'night' || timeOfDay === 'dusk'
-  const sounds: SoundType[] = []
+  const sounds: SoundType[] = ['piano'] // Piano always plays in background
 
   switch (condition) {
     case 'rain':
