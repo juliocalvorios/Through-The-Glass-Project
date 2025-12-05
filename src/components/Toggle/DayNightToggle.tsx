@@ -8,9 +8,10 @@ interface DayNightToggleProps {
   timeOfDay: TimeOfDay
   isOverride: boolean
   onToggle: () => void
+  onPlaySound?: () => void
 }
 
-export function DayNightToggle({ timeOfDay, isOverride, onToggle }: DayNightToggleProps) {
+export function DayNightToggle({ timeOfDay, isOverride, onToggle, onPlaySound }: DayNightToggleProps) {
   const id = useId()
   const isNight = timeOfDay === 'night' || timeOfDay === 'dusk'
   const isOn = !isNight
@@ -80,8 +81,18 @@ export function DayNightToggle({ timeOfDay, isOverride, onToggle }: DayNightTogg
         ))}
       </div>
 
-      {/* La lámpara cónica */}
-      <div className="relative flex flex-col items-center" style={{ marginTop: '-2px' }}>
+      {/* La lámpara cónica - clickeable */}
+      <motion.div
+        className="relative flex flex-col items-center cursor-pointer"
+        style={{ marginTop: '-2px' }}
+        onClick={() => {
+          onPlaySound?.()
+          onToggle()
+        }}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        title="Toggle light"
+      >
         <svg width="90" height="70" viewBox="0 0 90 70">
           <defs>
             <linearGradient id={`${id}-shadeOuter`} x1="0%" y1="0%" x2="100%" y2="100%">
@@ -171,7 +182,7 @@ export function DayNightToggle({ timeOfDay, isOverride, onToggle }: DayNightTogg
             }}
           />
         )}
-      </div>
+      </motion.div>
 
       {/* Luz proyectada hacia abajo - forma más natural */}
       {isOn && (
