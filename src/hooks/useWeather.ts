@@ -3,36 +3,69 @@
 import { useQuery } from '@tanstack/react-query'
 import { WeatherData, WeatherCondition, Location } from '@/types'
 
-// OpenWeatherMap API - necesitarás una API key gratuita
-const API_KEY = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY || 'demo'
-const BASE_URL = 'https://api.openweathermap.org/data/2.5'
+// Open-Meteo API - 100% gratuita, sin API key necesaria
+const BASE_URL = 'https://api.open-meteo.com/v1/forecast'
 
-// Mapeo de códigos de OpenWeather a nuestras condiciones
-function mapWeatherCondition(code: number, description: string): WeatherCondition {
-  // Thunderstorm
-  if (code >= 200 && code < 300) return 'storm'
-  // Drizzle & Rain
-  if (code >= 300 && code < 600) return 'rain'
+// Mapeo de códigos WMO de Open-Meteo a nuestras condiciones
+function mapWeatherCode(code: number): WeatherCondition {
+  // Clear sky
+  if (code === 0 || code === 1) return 'clear'
+  // Partly cloudy
+  if (code === 2) return 'cloudy'
+  // Overcast
+  if (code === 3) return 'cloudy'
+  // Fog
+  if (code >= 45 && code <= 48) return 'fog'
+  // Drizzle
+  if (code >= 51 && code <= 57) return 'rain'
+  // Rain
+  if (code >= 61 && code <= 67) return 'rain'
   // Snow
-  if (code >= 600 && code < 700) return 'snow'
-  // Atmosphere (fog, mist, etc.)
-  if (code >= 700 && code < 800) return 'fog'
-  // Clear
-  if (code === 800) return 'clear'
-  // Clouds
-  if (code > 800) return 'cloudy'
-  
+  if (code >= 71 && code <= 77) return 'snow'
+  // Rain showers
+  if (code >= 80 && code <= 82) return 'rain'
+  // Snow showers
+  if (code >= 85 && code <= 86) return 'snow'
+  // Thunderstorm
+  if (code >= 95 && code <= 99) return 'storm'
+
   return 'clear'
 }
 
-async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
-  // Si no hay API key, usamos datos mock
-  if (API_KEY === 'demo') {
-    return getMockWeather()
+// Descripción legible del código WMO
+function getWeatherDescription(code: number): string {
+  const descriptions: Record<number, string> = {
+    0: 'Clear sky',
+    1: 'Mainly clear',
+    2: 'Partly cloudy',
+    3: 'Overcast',
+    45: 'Fog',
+    48: 'Depositing rime fog',
+    51: 'Light drizzle',
+    53: 'Moderate drizzle',
+    55: 'Dense drizzle',
+    61: 'Slight rain',
+    63: 'Moderate rain',
+    65: 'Heavy rain',
+    71: 'Slight snow',
+    73: 'Moderate snow',
+    75: 'Heavy snow',
+    77: 'Snow grains',
+    80: 'Slight rain showers',
+    81: 'Moderate rain showers',
+    82: 'Violent rain showers',
+    85: 'Slight snow showers',
+    86: 'Heavy snow showers',
+    95: 'Thunderstorm',
+    96: 'Thunderstorm with slight hail',
+    99: 'Thunderstorm with heavy hail',
   }
+  return descriptions[code] || 'Unknown'
+}
 
+async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
   const response = await fetch(
-    `${BASE_URL}/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`
+    `${BASE_URL}?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto`
   )
 
   if (!response.ok) {
@@ -40,38 +73,19 @@ async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
   }
 
   const data = await response.json()
+  const current = data.current
 
   return {
-    temperature: Math.round(data.main.temp),
-    feelsLike: Math.round(data.main.feels_like),
-    humidity: data.main.humidity,
-    windSpeed: Math.round(data.wind.speed * 3.6), // m/s to km/h
-    condition: mapWeatherCondition(data.weather[0].id, data.weather[0].description),
-    description: data.weather[0].description,
-    icon: data.weather[0].icon,
+    temperature: Math.round(current.temperature_2m),
+    feelsLike: Math.round(current.apparent_temperature),
+    humidity: current.relative_humidity_2m,
+    windSpeed: Math.round(current.wind_speed_10m),
+    condition: mapWeatherCode(current.weather_code),
+    description: getWeatherDescription(current.weather_code),
+    icon: '01d', // Open-Meteo no tiene iconos, pero no lo usamos
     location: {
-      city: data.name,
-      country: data.sys.country,
-    },
-  }
-}
-
-// Mock para desarrollo sin API key
-function getMockWeather(): WeatherData {
-  const conditions: WeatherCondition[] = ['clear', 'rain', 'snow', 'fog', 'storm', 'cloudy']
-  const randomCondition = conditions[Math.floor(Math.random() * conditions.length)]
-  
-  return {
-    temperature: Math.round(Math.random() * 30 - 5), // -5 to 25
-    feelsLike: Math.round(Math.random() * 30 - 5),
-    humidity: Math.round(Math.random() * 60 + 40), // 40-100
-    windSpeed: Math.round(Math.random() * 30),
-    condition: randomCondition,
-    description: randomCondition,
-    icon: '01d',
-    location: {
-      city: 'Toronto',
-      country: 'CA',
+      city: 'Your Location',
+      country: '',
     },
   }
 }
