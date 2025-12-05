@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useId } from 'react'
+import { useState, useId, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   AnalogClock,
@@ -13,8 +13,9 @@ import {
   ThreeRain,
   ThreeSun,
   ThreeFog,
+  Bookshelf,
 } from '@/components'
-import { useLocation, useWeather, useTime, useAmbientSound } from '@/hooks'
+import { useLocation, useWeather, useTime, useAmbientSound, useInteractionSounds } from '@/hooks'
 import { TimeOfDay, WeatherCondition } from '@/types'
 
 export default function Home() {
@@ -32,20 +33,55 @@ export default function Home() {
   const currentCondition = conditionOverride || weather?.condition || 'clear'
   const isNight = currentTimeOfDay === 'night' || currentTimeOfDay === 'dusk'
 
-  // Sound system
+  // Ambient sound system
   const { isEnabled: soundEnabled, toggleSound, playThunder } = useAmbientSound(
     currentCondition,
     currentTimeOfDay,
     { enabled: false }
   )
 
-  // Toggle día/noche
+  // Interaction sounds (curtains, switch, clock ticking, lamp)
+  const {
+    playSound,
+    startClockTick,
+    stopClockTick,
+    setEnabled: setInteractionSoundsEnabled
+  } = useInteractionSounds(true)
+
+  // Start clock ticking on mount
+  useEffect(() => {
+    startClockTick()
+    return () => stopClockTick()
+  }, [startClockTick, stopClockTick])
+
+  // Sync interaction sounds with ambient sound toggle
+  useEffect(() => {
+    setInteractionSoundsEnabled(soundEnabled)
+  }, [soundEnabled, setInteractionSoundsEnabled])
+
+  // Toggle día/noche (with sound)
   const handleTimeToggle = () => {
+    playSound('lightSwitch')
     if (timeOverride) {
       setTimeOverride(null)
     } else {
       setTimeOverride(isNight ? 'day' : 'night')
     }
+  }
+
+  // Toggle cortinas (with sound)
+  const handleCurtainsToggle = () => {
+    if (curtainsOpen) {
+      playSound('curtainClose')
+    } else {
+      playSound('curtainOpen')
+    }
+    setCurtainsOpen(!curtainsOpen)
+  }
+
+  // Play lamp sound
+  const playLampSound = () => {
+    playSound('lamp')
   }
 
   // Colores de la cabaña de madera roja
@@ -203,10 +239,11 @@ export default function Home() {
       )}
 
       {/* Reloj analógico en la pared (arriba derecha) */}
-      <div className="absolute top-8 right-8 z-30">
+      <div className="absolute top-20 right-8 z-30">
         <AnalogClock
           weather={weather}
           timeOfDay={currentTimeOfDay}
+          condition={currentCondition}
         />
       </div>
 
@@ -216,11 +253,12 @@ export default function Home() {
           timeOfDay={currentTimeOfDay}
           isOverride={timeOverride !== null}
           onToggle={handleTimeToggle}
+          onPlaySound={playLampSound}
         />
       </div>
 
-      {/* Selector de clima estilo cabaña */}
-      <div className="absolute bottom-8 left-8 z-30">
+      {/* Selector de clima estilo cabaña - centrado en el footer */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30">
         <WeatherSelector
           currentCondition={currentCondition}
           isOverride={conditionOverride !== null}
@@ -255,7 +293,7 @@ export default function Home() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2 }}
-        className="absolute bottom-8 right-8 z-30"
+        className="absolute bottom-4 right-1/2 translate-x-1/2 z-30"
       >
         <span
           className="text-xs tracking-wider"
@@ -269,13 +307,20 @@ export default function Home() {
         </span>
       </motion.div>
 
+      {/* Estantería a la izquierda */}
+      <div className="absolute bottom-4 left-6 z-30">
+        <Bookshelf
+          timeOfDay={currentTimeOfDay}
+        />
+      </div>
+
       {/* Interruptor de pared (luz y cortinas) */}
       <WallSwitch
         isNight={isNight}
         lightOn={!isNight}
         curtainsOpen={curtainsOpen}
         onLightToggle={handleTimeToggle}
-        onCurtainsToggle={() => setCurtainsOpen(!curtainsOpen)}
+        onCurtainsToggle={handleCurtainsToggle}
         isLightOverride={timeOverride !== null}
       />
 
@@ -284,7 +329,7 @@ export default function Home() {
         timeOfDay={currentTimeOfDay}
         condition={currentCondition}
         curtainsOpen={curtainsOpen}
-        onCurtainsToggle={() => setCurtainsOpen(!curtainsOpen)}
+        onCurtainsToggle={handleCurtainsToggle}
       >
         <WeatherEffects
           condition={currentCondition}
@@ -662,9 +707,8 @@ function WallSwitch({
       transition={{ duration: 0.8, delay: 0.5 }}
       className="absolute z-50"
       style={{
-        left: '80px',
-        top: '50%',
-        transform: 'translateY(-50%)',
+        left: '200px',
+        top: '42.5%',
       }}
     >
       {/* Placa del interruptor */}
