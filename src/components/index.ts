@@ -1,5 +1,8 @@
 export { Clock } from './Clock'
 export { AnalogClock } from './Clock'
+export { CuckooClock, CuckooClockPreview } from './Clock'
 export { DayNightToggle } from './Toggle'
 export { WindowFrame, NordicWindow } from './Window'
 export { Rain, Snow, Stars, Lightning, Sun, Aurora, Fog, Clouds, ThreeStorm, ThreeSnow, ThreeRain, ThreeSun, ThreeAurora, ThreeFog } from './Weather'
+export { Fireplace, FireplaceShowcase } from './Fireplace'
+export { Bookshelf } from './Bookshelf'

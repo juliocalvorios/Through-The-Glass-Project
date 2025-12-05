@@ -2,30 +2,61 @@
 
 import { useEffect, useState, memo } from 'react'
 import { motion } from 'framer-motion'
-import { WeatherData, TimeOfDay } from '@/types'
+import { WeatherData, TimeOfDay, WeatherCondition } from '@/types'
 
 interface AnalogClockProps {
   weather?: WeatherData
   timeOfDay: TimeOfDay
+  condition?: WeatherCondition
+  onHoverStart?: () => void
+  onHoverEnd?: () => void
 }
 
-function AnalogClockComponent({ weather, timeOfDay }: AnalogClockProps) {
+function AnalogClockComponent({ weather, timeOfDay, condition, onHoverStart, onHoverEnd }: AnalogClockProps) {
   const [time, setTime] = useState(new Date())
+  const [isHoveringClock, setIsHoveringClock] = useState(false)
+  const [isHoveringFolio, setIsHoveringFolio] = useState(false)
+  const [particles, setParticles] = useState<Array<{ id: number; x: number; size: number; duration: number }>>([])
   const isNight = timeOfDay === 'night' || timeOfDay === 'dusk'
+
+  // Usar condition override o el del weather
+  const currentCondition = condition || weather?.condition || 'clear'
 
   useEffect(() => {
     const interval = setInterval(() => setTime(new Date()), 1000)
     return () => clearInterval(interval)
   }, [])
 
+  // Generar partículas solo para nieve/lluvia/tormenta
+  const hasParticles = currentCondition === 'snow' || currentCondition === 'rain' || currentCondition === 'storm'
+
+  useEffect(() => {
+    if (isHoveringFolio && hasParticles) {
+      const interval = setInterval(() => {
+        setParticles(prev => {
+          const newParticle = {
+            id: Date.now() + Math.random(),
+            x: Math.random() * 50 - 25,
+            size: 2 + Math.random() * 3,
+            duration: 1 + Math.random() * 0.5
+          }
+          return [...prev.slice(-6), newParticle]
+        })
+      }, 250)
+      return () => clearInterval(interval)
+    } else {
+      setParticles([])
+    }
+  }, [isHoveringFolio, hasParticles])
+
   const seconds = time.getSeconds()
   const minutes = time.getMinutes()
   const hours = time.getHours() % 12
 
-  // Ángulos de las agujas
-  const secondDeg = seconds * 6
-  const minuteDeg = minutes * 6 + seconds * 0.1
-  const hourDeg = hours * 30 + minutes * 0.5
+  // Ángulos de las agujas - cuando hay hover, giran rápido
+  const secondDeg = isHoveringClock ? seconds * 6 + 720 : seconds * 6
+  const minuteDeg = isHoveringClock ? minutes * 6 + seconds * 0.1 + 360 : minutes * 6 + seconds * 0.1
+  const hourDeg = isHoveringClock ? hours * 30 + minutes * 0.5 + 180 : hours * 30 + minutes * 0.5
 
   // Colores SCANDINAVIAN WINTER CABIN - Madera roja noruega
   const colors = {
@@ -63,10 +94,18 @@ function AnalogClockComponent({ weather, timeOfDay }: AnalogClockProps) {
           RELOJ PRINCIPAL
           ============================================ */}
       <div
-        className="relative"
+        className="relative cursor-pointer"
         style={{
           width: '160px',
           height: '160px',
+        }}
+        onMouseEnter={() => {
+          setIsHoveringClock(true)
+          onHoverStart?.()
+        }}
+        onMouseLeave={() => {
+          setIsHoveringClock(false)
+          onHoverEnd?.()
         }}
       >
         {/* ============================================
@@ -386,39 +425,145 @@ function AnalogClockComponent({ weather, timeOfDay }: AnalogClockProps) {
       </div>
 
       {/* ============================================
-          TEMPERATURA Y UBICACIÓN
+          TEMPERATURA Y UBICACIÓN - FOLIO CON CHINCHETA
           ============================================ */}
       {weather && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={{ opacity: 1, y: 0, rotate: 0 }}
           transition={{ delay: 0.5, duration: 0.6 }}
-          className="text-center"
+          className="relative mt-3 cursor-pointer"
+          style={{ transformOrigin: 'top center' }}
+          onMouseEnter={() => setIsHoveringFolio(true)}
+          onMouseLeave={() => setIsHoveringFolio(false)}
+          whileHover={{
+            rotate: [0, -2, 2, -1, 1, 0],
+            transition: { duration: 1.2, ease: 'easeInOut', repeat: Infinity }
+          }}
         >
-          {/* Temperatura */}
+          {/* Partículas nieve/lluvia */}
+          {particles.map((particle) => {
+            const isSnow = currentCondition === 'snow'
+            const isRain = currentCondition === 'rain' || currentCondition === 'storm'
+
+            return (
+              <motion.div
+                key={particle.id}
+                className="absolute pointer-events-none"
+                style={{
+                  left: `calc(50% + ${particle.x}px)`,
+                  bottom: 0,
+                  width: isRain ? 2 : particle.size,
+                  height: isRain ? particle.size * 3 : particle.size,
+                  background: isSnow
+                    ? 'radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.4) 100%)'
+                    : 'linear-gradient(180deg, rgba(150,200,255,0.8) 0%, rgba(100,150,220,0.4) 100%)',
+                  boxShadow: isSnow
+                    ? '0 0 4px rgba(255,255,255,0.5)'
+                    : '0 0 3px rgba(100,150,220,0.4)',
+                  borderRadius: isRain ? '0 0 50% 50%' : '50%',
+                }}
+                initial={{ opacity: 0, y: 0 }}
+                animate={{ opacity: [0, 1, 1, 0], y: 50 }}
+                transition={{ duration: particle.duration, ease: 'easeOut' }}
+              />
+            )
+          })}
+
+          {/* Efecto niebla para fog/cloudy */}
+          {isHoveringFolio && (currentCondition === 'fog' || currentCondition === 'cloudy') && (
+            <motion.div
+              className="absolute inset-0 pointer-events-none rounded"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+              style={{
+                background: 'radial-gradient(ellipse at center, rgba(200,200,210,0.4) 0%, transparent 70%)',
+                filter: 'blur(8px)',
+              }}
+            />
+          )}
+
+          {/* Rayos de sol para clear */}
+          {isHoveringFolio && currentCondition === 'clear' && (
+            <motion.div
+              className="absolute pointer-events-none"
+              style={{
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+              }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1, rotate: 360 }}
+              transition={{ opacity: { duration: 0.3 }, scale: { duration: 0.3 }, rotate: { duration: 20, repeat: Infinity, ease: 'linear' } }}
+            >
+              {[...Array(8)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute"
+                  style={{
+                    width: '2px',
+                    height: '25px',
+                    background: 'linear-gradient(180deg, rgba(255,220,150,0.8) 0%, transparent 100%)',
+                    left: '50%',
+                    top: '50%',
+                    transformOrigin: 'center top',
+                    transform: `translateX(-50%) rotate(${i * 45}deg) translateY(-20px)`,
+                  }}
+                />
+              ))}
+            </motion.div>
+          )}
+
+          {/* Folio/papel - estilo Scandinavian Winter Cabin */}
           <div
-            className="text-3xl font-light tracking-wide"
+            className="relative px-5 py-4 text-center"
             style={{
-              color: colors.face.text,
-              fontFamily: 'Georgia, serif',
-              textShadow: isNight ? '0 0 10px rgba(196,168,130,0.3)' : 'none',
+              background: isNight
+                ? 'linear-gradient(180deg, #1a1815 0%, #151210 100%)'
+                : 'linear-gradient(180deg, #FDF8F0 0%, #F5EDE0 100%)',
+              boxShadow: isNight
+                ? '2px 3px 10px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)'
+                : '2px 3px 8px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.5)',
+              border: `1px solid ${isNight ? '#2a1515' : '#D4C4B0'}`,
+              transform: 'rotate(-1deg)',
             }}
           >
-            {weather.temperature}°
-          </div>
-
-          {/* Ubicación */}
-          {weather.location?.city && (
+            {/* Temperatura */}
             <div
-              className="text-[10px] uppercase tracking-[0.2em] mt-1"
+              className="text-2xl font-light tracking-wide"
               style={{
-                color: colors.face.accent,
-                opacity: 0.7,
+                color: isNight ? '#C4A882' : '#4A2020',
+                fontFamily: 'Georgia, serif',
               }}
             >
-              {weather.location.city}
+              {weather.temperature}°
             </div>
-          )}
+
+            {/* Ubicación */}
+            {weather.location?.city && (
+              <div
+                className="text-[9px] uppercase tracking-[0.15em] mt-1"
+                style={{
+                  color: isNight ? '#8B7355' : '#6B2D2D',
+                }}
+              >
+                {weather.location.city}
+              </div>
+            )}
+          </div>
+
+          {/* Chincheta - latón/bronce estilo cabin */}
+          <div
+            className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full"
+            style={{
+              background: isNight
+                ? 'radial-gradient(circle at 35% 35%, #A08060 0%, #6B5344 70%, #4a3a2a 100%)'
+                : 'radial-gradient(circle at 35% 35%, #F4CF67 0%, #D4AF37 70%, #AA8C2C 100%)',
+              boxShadow: '0 2px 3px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.3)',
+            }}
+          />
         </motion.div>
       )}
     </motion.div>
@@ -542,7 +687,7 @@ function HourHand({ angle, colors, isShadow = false }: { angle: number; colors: 
         transform: isShadow ? 'translate(2px, 2px)' : undefined,
       }}
       animate={{ rotate: angle }}
-      transition={{ type: 'spring', stiffness: 80, damping: 15 }}
+      transition={{ type: 'spring', stiffness: 50, damping: 12 }}
     >
       {/* Forma de flecha/spade */}
       <svg
@@ -599,7 +744,7 @@ function MinuteHand({ angle, colors, isShadow = false }: { angle: number; colors
         transform: isShadow ? 'translate(2px, 2px)' : undefined,
       }}
       animate={{ rotate: angle }}
-      transition={{ type: 'spring', stiffness: 80, damping: 15 }}
+      transition={{ type: 'spring', stiffness: 50, damping: 12 }}
     >
       <svg
         width="6"
