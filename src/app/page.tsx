@@ -37,7 +37,7 @@ export default function Home() {
   const { isEnabled: soundEnabled, toggleSound, playThunder } = useAmbientSound(
     currentCondition,
     currentTimeOfDay,
-    { enabled: false }
+    { enabled: true }
   )
 
   // Interaction sounds (curtains, switch, clock ticking, lamp)
@@ -48,11 +48,6 @@ export default function Home() {
     setEnabled: setInteractionSoundsEnabled
   } = useInteractionSounds(true)
 
-  // Start clock ticking on mount
-  useEffect(() => {
-    startClockTick()
-    return () => stopClockTick()
-  }, [startClockTick, stopClockTick])
 
   // Sync interaction sounds with ambient sound toggle
   useEffect(() => {
@@ -244,6 +239,8 @@ export default function Home() {
           weather={weather}
           timeOfDay={currentTimeOfDay}
           condition={currentCondition}
+          onHoverStart={startClockTick}
+          onHoverEnd={stopClockTick}
         />
       </div>
 
@@ -263,6 +260,7 @@ export default function Home() {
           currentCondition={currentCondition}
           isOverride={conditionOverride !== null}
           onSelect={(c) => setConditionOverride(c === conditionOverride ? null : c)}
+          onHoverIcon={() => playSound('weatherSwitch')}
           isNight={isNight}
         />
       </div>
@@ -311,6 +309,7 @@ export default function Home() {
       <div className="absolute bottom-4 left-6 z-30">
         <Bookshelf
           timeOfDay={currentTimeOfDay}
+          onBookHover={() => playSound('bookDrop')}
         />
       </div>
 
@@ -447,11 +446,13 @@ function WeatherSelector({
   currentCondition,
   isOverride,
   onSelect,
+  onHoverIcon,
   isNight,
 }: {
   currentCondition: WeatherCondition
   isOverride: boolean
   onSelect: (c: WeatherCondition) => void
+  onHoverIcon?: () => void
   isNight: boolean
 }) {
   const conditions: { value: WeatherCondition; icon: React.ReactNode; label: string }[] = [
@@ -537,6 +538,7 @@ function WeatherSelector({
               <motion.button
                 key={value}
                 onClick={() => onSelect(value)}
+                onMouseEnter={onHoverIcon}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 className="relative w-9 h-9 rounded-md flex items-center justify-center transition-colors"
@@ -764,7 +766,7 @@ function WallSwitch({
               background: `linear-gradient(180deg, ${colors.plateDark} 0%, ${colors.plate} 100%)`,
               boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.3)',
             }}
-            title="Luz"
+            title="Light"
           >
             {/* El switch que se mueve */}
             <motion.div
@@ -820,7 +822,7 @@ function WallSwitch({
               background: `linear-gradient(180deg, ${colors.plateDark} 0%, ${colors.plate} 100%)`,
               boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.3)',
             }}
-            title="Cortinas"
+            title="Curtains"
           >
             {/* El switch que se mueve */}
             <motion.div
