@@ -17,21 +17,21 @@ type SoundType = 'rain' | 'storm' | 'thunder' | 'wind' | 'snow' | 'fire' | 'bird
 // You'll need to add actual sound files to public/sounds/
 const SOUND_CONFIGS: Record<SoundType, SoundConfig> = {
   rain: {
-    src: '/sounds/rain.mp3',
+    src: '/sounds/rain-sound.mp3',
     volume: 0.4,
     loop: true,
     fadeIn: 2000,
     fadeOut: 2000,
   },
   storm: {
-    src: '/sounds/storm.mp3',
+    src: '/sounds/storm-snow.mp3',
     volume: 0.5,
     loop: true,
     fadeIn: 1500,
     fadeOut: 2000,
   },
   thunder: {
-    src: '/sounds/thunder.mp3',
+    src: '/sounds/storm-snow.mp3',
     volume: 0.7,
     loop: false,
   },
@@ -43,8 +43,8 @@ const SOUND_CONFIGS: Record<SoundType, SoundConfig> = {
     fadeOut: 3000,
   },
   snow: {
-    src: '/sounds/snow-wind.mp3',
-    volume: 0.2,
+    src: '/sounds/storm-snow.mp3',
+    volume: 0.25,
     loop: true,
     fadeIn: 3000,
     fadeOut: 3000,
@@ -291,6 +291,35 @@ export function useAmbientSound(
       audio.volume = config.volume * masterVolume
     })
   }, [masterVolume])
+
+  // Auto-start sounds on first user interaction (browser autoplay policy)
+  useEffect(() => {
+    if (!isEnabled || isMuted) return
+
+    const startOnInteraction = () => {
+      const targetSounds = getSoundsForWeather(condition, timeOfDay)
+      targetSounds.forEach(sound => {
+        const audio = audioRefs.current.get(sound)
+        if (!audio || audio.paused) {
+          playSound(sound)
+        }
+      })
+      // Remove listeners after first interaction
+      document.removeEventListener('click', startOnInteraction)
+      document.removeEventListener('keydown', startOnInteraction)
+      document.removeEventListener('touchstart', startOnInteraction)
+    }
+
+    document.addEventListener('click', startOnInteraction)
+    document.addEventListener('keydown', startOnInteraction)
+    document.addEventListener('touchstart', startOnInteraction)
+
+    return () => {
+      document.removeEventListener('click', startOnInteraction)
+      document.removeEventListener('keydown', startOnInteraction)
+      document.removeEventListener('touchstart', startOnInteraction)
+    }
+  }, [isEnabled, isMuted, condition, timeOfDay, playSound])
 
   // Cleanup on unmount
   useEffect(() => {
