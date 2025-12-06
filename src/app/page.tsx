@@ -19,9 +19,11 @@ import { useLocation, useWeather, useTime, useAmbientSound, useInteractionSounds
 import { TimeOfDay, WeatherCondition } from '@/types'
 
 export default function Home() {
-  const { location } = useLocation()
-  const { data: weather, isLoading } = useWeather(location)
+  const { location, isLoading: locationLoading } = useLocation()
+  const { data: weather, isLoading: weatherLoading } = useWeather(location)
   const time = useTime()
+
+  const isLoading = locationLoading || weatherLoading
 
   // Override para demo/testing
   const [timeOverride, setTimeOverride] = useState<TimeOfDay | null>(null)
@@ -86,6 +88,15 @@ export default function Home() {
     wallDark: isNight ? '#120808' : '#6B3636',
     plank: isNight ? '#251212' : '#7A4040',
     groove: isNight ? '#0a0505' : '#4A2525',
+  }
+
+  // Loading screen
+  if (isLoading) {
+    return (
+      <main className="relative min-h-screen w-full overflow-hidden flex items-center justify-center bg-neutral-800">
+        <div className="w-8 h-8 border-2 border-neutral-600 border-t-neutral-400 rounded-full animate-spin" />
+      </main>
+    )
   }
 
   return (
@@ -269,7 +280,7 @@ export default function Home() {
       <motion.button
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.5 }}
+        transition={{ duration: 0.5 }}
         onClick={toggleSound}
         className="absolute top-8 left-8 z-30 w-10 h-10 rounded-lg flex items-center justify-center transition-all"
         style={{
@@ -290,7 +301,7 @@ export default function Home() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 2 }}
+        transition={{ duration: 0.5 }}
         className="absolute bottom-4 right-6 z-30 group cursor-default"
       >
         <span
@@ -341,18 +352,6 @@ export default function Home() {
           onLightningStrike={playThunder}
         />
       </NordicWindow>
-
-      {/* Loading */}
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
-            className="w-10 h-10 border-2 border-t-transparent rounded-full"
-            style={{ borderColor: isNight ? '#D4A574' : '#8B4A4A' }}
-          />
-        </div>
-      )}
     </main>
   )
 }
@@ -510,9 +509,9 @@ function WeatherSelector({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 1.2 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
       className="relative"
     >
       {/* Marco de madera del selector */}
@@ -623,9 +622,11 @@ function RainIcon() {
 
 function SnowIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-      <path d="M12 2v20M17 7l-10 10M7 7l10 10" />
-      <circle cx="12" cy="12" r="2" fill="currentColor" />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2v20" />
+      <path d="M2 12h20" />
+      <path d="m4.93 4.93 14.14 14.14" />
+      <path d="m19.07 4.93-14.14 14.14" />
     </svg>
   )
 }
@@ -709,9 +710,9 @@ function WallSwitch({
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.8, delay: 0.5 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
       className="absolute z-50"
       style={{
         left: '200px',
@@ -910,3 +911,4 @@ function WallSwitch({
     </motion.div>
   )
 }
+
