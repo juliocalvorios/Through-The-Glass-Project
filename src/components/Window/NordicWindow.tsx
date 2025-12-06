@@ -39,9 +39,9 @@ function NordicWindowComponent({ children, timeOfDay, condition, curtainsOpen = 
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
       className="relative"
       style={{
         width: 'min(80vw, 700px)',
@@ -836,15 +836,38 @@ function Curtains({
         />
 
         {/* Anillas de cortina - latón */}
-        {[15, 25, 75, 85].map((pos, i) => (
-          <div
-            key={i}
+        {/* Anillas izquierdas */}
+        {[0, 1, 2].map((i) => (
+          <motion.div
+            key={`left-${i}`}
             className="absolute top-1/2 -translate-y-1/2 w-2.5 h-3 rounded-full border-2"
             style={{
-              left: `${pos}%`,
               borderColor: isNight ? '#8B7355' : '#C9A876',
               background: 'transparent',
+              left: isOpen ? `${5 + i * 4}%` : `${15 + i * 10}%`,
             }}
+            initial={false}
+            animate={{
+              left: isOpen ? `${5 + i * 4}%` : `${15 + i * 10}%`,
+            }}
+            transition={{ duration: 1.2, ease: 'easeInOut' }}
+          />
+        ))}
+        {/* Anillas derechas */}
+        {[0, 1, 2].map((i) => (
+          <motion.div
+            key={`right-${i}`}
+            className="absolute top-1/2 -translate-y-1/2 w-2.5 h-3 rounded-full border-2"
+            style={{
+              borderColor: isNight ? '#8B7355' : '#C9A876',
+              background: 'transparent',
+              right: isOpen ? `${5 + i * 4}%` : `${15 + i * 10}%`,
+            }}
+            initial={false}
+            animate={{
+              right: isOpen ? `${5 + i * 4}%` : `${15 + i * 10}%`,
+            }}
+            transition={{ duration: 1.2, ease: 'easeInOut' }}
           />
         ))}
       </div>
