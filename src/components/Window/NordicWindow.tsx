@@ -909,7 +909,7 @@ function Windowsill({ colors, isNight, condition }: { colors: any; isNight: bool
         {/* Nieve acumulada en el alféizar */}
         {condition === 'snow' && (
           <motion.div
-            className="absolute -top-2 left-2 right-2 h-4"
+            className="absolute -top-2 left-2 right-2 h-4 -z-10"
             initial={{ scaleY: 0 }}
             animate={{ scaleY: 1 }}
             transition={{ duration: 3 }}
