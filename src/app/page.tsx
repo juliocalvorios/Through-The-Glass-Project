@@ -214,8 +214,8 @@ export default function Home() {
           <motion.div
             className="absolute pointer-events-none"
             style={{
-              width: '500px',
-              height: '300px',
+              width: 'min(500px, 90vw)',
+              height: 'min(300px, 50vh)',
               bottom: '10%',
               left: '50%',
               transform: 'translateX(-50%)',
@@ -244,8 +244,8 @@ export default function Home() {
         />
       )}
 
-      {/* Reloj analógico en la pared (arriba derecha) */}
-      <div className="absolute top-20 right-8 z-30">
+      {/* Reloj analógico en la pared (arriba derecha) - oculto en móvil pequeño */}
+      <div className="absolute top-8 right-4 sm:top-12 sm:right-6 md:top-20 md:right-8 z-30 hidden sm:block">
         <AnalogClock
           weather={weather}
           timeOfDay={currentTimeOfDay}
@@ -255,8 +255,8 @@ export default function Home() {
         />
       </div>
 
-      {/* Lámpara de techo (izquierda) */}
-      <div className="absolute top-0 left-16 z-30">
+      {/* Lámpara de techo (izquierda) - oculta en móvil pequeño */}
+      <div className="absolute top-0 left-4 sm:left-8 md:left-16 z-30 hidden sm:block">
         <DayNightToggle
           timeOfDay={currentTimeOfDay}
           isOverride={timeOverride !== null}
@@ -265,8 +265,15 @@ export default function Home() {
         />
       </div>
 
-      {/* Selector de clima estilo cabaña - centrado en el footer */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30">
+      {/* Selector de clima estilo cabaña - centrado debajo de la ventana */}
+      <div
+        className="absolute z-30"
+        style={{
+          bottom: 'max(calc(50vh - min(32.5vh, 275px) - 135px), 20px)',
+          left: '50%',
+          transform: 'translateX(-50%)',
+        }}
+      >
         <WeatherSelector
           currentCondition={currentCondition}
           isOverride={conditionOverride !== null}
@@ -282,7 +289,7 @@ export default function Home() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
         onClick={toggleSound}
-        className="absolute top-8 left-8 z-30 w-10 h-10 rounded-lg flex items-center justify-center transition-all"
+        className="absolute top-4 left-4 sm:top-8 sm:left-8 z-30 w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all"
         style={{
           background: isNight ? 'rgba(42, 24, 24, 0.8)' : 'rgba(107, 58, 58, 0.8)',
           border: `1px solid ${isNight ? '#1a0f0f' : '#4A2525'}`,
@@ -297,15 +304,36 @@ export default function Home() {
         <SoundIcon enabled={soundEnabled} isNight={isNight} />
       </motion.button>
 
+      {/* Mobile Night Toggle - only visible on small screens */}
+      <motion.button
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        onClick={handleTimeToggle}
+        className="absolute top-4 right-4 z-30 w-8 h-8 rounded-lg flex items-center justify-center transition-all sm:hidden"
+        style={{
+          background: isNight ? 'rgba(42, 24, 24, 0.8)' : 'rgba(107, 58, 58, 0.8)',
+          border: `1px solid ${isNight ? '#1a0f0f' : '#4A2525'}`,
+          boxShadow: isNight
+            ? '0 0 12px rgba(212,165,116,0.4)'
+            : '0 2px 8px rgba(0,0,0,0.3)',
+        }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        title={isNight ? 'Switch to day' : 'Switch to night'}
+      >
+        <NightToggleIcon isNight={isNight} />
+      </motion.button>
+
       {/* Crédito discreto - esquina inferior derecha */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="absolute bottom-4 right-6 z-30 group cursor-default"
+        className="absolute bottom-2 right-4 sm:bottom-4 sm:right-6 z-30 group cursor-default"
       >
         <span
-          className="relative text-xs tracking-wider"
+          className="relative text-[10px] sm:text-xs tracking-wider"
           style={{
             color: isNight ? 'rgba(212,165,116,0.7)' : 'rgba(201,168,108,0.8)',
             fontFamily: 'Georgia, serif',
@@ -321,8 +349,8 @@ export default function Home() {
         </span>
       </motion.div>
 
-      {/* Estantería a la izquierda */}
-      <div className="absolute bottom-4 left-6 z-30">
+      {/* Estantería a la izquierda - oculta en móvil y tablet */}
+      <div className="absolute bottom-4 left-6 z-30 hidden md:block">
         <Bookshelf
           timeOfDay={currentTimeOfDay}
           onBookHover={() => playSound('bookDrop')}
@@ -516,7 +544,7 @@ function WeatherSelector({
     >
       {/* Marco de madera del selector */}
       <div
-        className="relative p-1 rounded-lg"
+        className="relative p-0.5 sm:p-1 rounded-lg"
         style={{
           background: `linear-gradient(145deg, ${selectorColors.bgLight} 0%, ${selectorColors.bg} 50%, ${selectorColors.border} 100%)`,
           boxShadow: `
@@ -528,7 +556,7 @@ function WeatherSelector({
       >
         {/* Borde interior */}
         <div
-          className="p-3 rounded-md flex gap-1"
+          className="p-1.5 sm:p-2 md:p-3 rounded-md flex gap-0.5 sm:gap-1"
           style={{
             background: isNight
               ? 'linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 100%)'
@@ -545,7 +573,7 @@ function WeatherSelector({
                 onMouseEnter={onHoverIcon}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                className="relative w-9 h-9 rounded-md flex items-center justify-center transition-colors"
+                className="relative w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-md flex items-center justify-center transition-colors"
                 style={{
                   background: isSelected ? selectorColors.selected : 'transparent',
                   border: isSelected
@@ -557,7 +585,7 @@ function WeatherSelector({
                 }}
                 title={label}
               >
-                <div style={{ color: isSelected ? selectorColors.accent : selectorColors.text }}>
+                <div className="scale-75 sm:scale-90 md:scale-100" style={{ color: isSelected ? selectorColors.accent : selectorColors.text }}>
                   {icon}
                 </div>
                 {/* Indicador de override */}
@@ -681,6 +709,28 @@ function SoundIcon({ enabled, isNight }: { enabled: boolean; isNight: boolean })
   )
 }
 
+// Night toggle icon for mobile
+function NightToggleIcon({ isNight }: { isNight: boolean }) {
+  const color = isNight ? '#E8D5C4' : '#F5EBE0'
+
+  if (isNight) {
+    // Show sun icon when it's night (to switch to day)
+    return (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
+        <circle cx="12" cy="12" r="4" fill={color} fillOpacity="0.3" />
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+      </svg>
+    )
+  }
+
+  // Show moon icon when it's day (to switch to night)
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill={color} fillOpacity="0.3" />
+    </svg>
+  )
+}
+
 // Interruptor de pared estilo cabaña con 2 botones
 function WallSwitch({
   isNight,
@@ -713,9 +763,9 @@ function WallSwitch({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="absolute z-50"
+      className="absolute z-50 hidden md:block"
       style={{
-        left: '200px',
+        left: 'calc(50vw - min(40vw, 350px) - 120px)',
         top: '42.5%',
       }}
     >
