@@ -42,7 +42,7 @@ const bookContents = {
       'Crafted with passion',
       'by Julio Calvo',
       '',
-      '— Frontend Developer —',
+      '— Frontend Engineer —',
       '',
     ],
   },
